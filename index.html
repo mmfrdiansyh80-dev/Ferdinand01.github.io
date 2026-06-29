@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Notepad Premium - Fixed View Mode</title>
+    <title>Smart Notepad Premium - In-Place Edit Mode</title>
     <style>
         :root {
             --bg-body: #f4f6f9;
@@ -207,6 +207,12 @@
         .btn-edit { background: #ecc94b; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .btn-delete { background: #f56565; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .btn-download-photo { display: block; width: 100%; box-sizing: border-box; text-align: center; background: #3182ce; color: #fff; text-decoration: none; font-size: 10px; padding: 4px; margin-top: 4px; border-radius: 4px; font-weight: bold; }
+        
+        /* Gaya Khusus Form Inline di Dalam Kartu Catatan saat mengedit */
+        .inline-edit-form { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; width: 100%; }
+        .inline-edit-form input, .inline-edit-form textarea { margin: 4px 0; width: 100%; }
+        .inline-btn-group { display: flex; gap: 8px; margin-top: 5px; }
+        .btn-save-inline { background: #48bb78; color: #fff; border: none; padding: 6px 14px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body class="mode-auto">
@@ -228,7 +234,6 @@
     <div class="notepad-form">
         <h3 id="formTitle">✏️ Tulis Catatan Baru</h3>
         <form id="noteForm" onsubmit="simulasikanSimpanCatatan(event)">
-            <input type="hidden" id="noteId" value="">
             <input type="text" id="noteTitleInput" placeholder="Judul Catatan (Bisa dikosongkan)">
             <div class="folder-flex">
                 <input type="text" id="newFolderInput" placeholder="📁 Buat Nama Folder Baru (Misal: Kuliah, Kerja)">
@@ -252,7 +257,6 @@
             <div class="preview-container" id="previewContainer"></div>
             <div style="margin-top: 15px;">
                 <button type="submit" class="btn-submit" id="btnSubmitForm">Simpan Catatan</button>
-                <button type="button" class="btn-reset-filter" id="btnCancelEdit" style="display:none; margin-top: 5px;" onclick="cancelEditMode()">Batal</button>
             </div>
         </form>
     </div>
@@ -292,27 +296,27 @@
     <!-- DATA VIEWER CONTAINER -->
     <div id="semua" class="tab-content active">
         <h2>Daftar Riwayat Catatan Lengkap</h2>
-        <div class="folder-list-container sortable-container" data-zone="folder" id="container-semua"></div>
+        <div class="folder-list-container" id="container-semua"></div>
     </div>
 
     <div id="tulisan" class="tab-content">
         <h2>📝 Pusat Catatan Teks Fokus</h2>
-        <div class="folder-list-container sortable-container" data-zone="folder" id="container-tulisan"></div>
+        <div class="folder-list-container" id="container-tulisan"></div>
     </div>
 
     <div id="galeri" class="tab-content">
         <h2>🖼️ Pusat Gambar Terstruktur</h2>
-        <div class="folder-list-container sortable-container" data-zone="folder" id="container-galeri"></div>
+        <div class="folder-list-container" id="container-galeri"></div>
     </div>
 
     <div id="vid" class="tab-content">
         <h2>🎬 Pusat File Video Terstruktur</h2>
-        <div class="folder-list-container sortable-container" data-zone="folder" id="container-vid"></div>
+        <div class="folder-list-container" id="container-vid"></div>
     </div>
 
     <div id="dokumen" class="tab-content">
         <h2>🗂️ Pusat File Dokumen & Mentahan Desain</h2>
-        <div class="folder-list-container sortable-container" data-zone="folder" id="container-dokumen"></div>
+        <div class="folder-list-container" id="container-dokumen"></div>
     </div>
 
     <div id="tautan" class="tab-content">
@@ -320,7 +324,7 @@
         <div class="table-responsive">
             <table class="link-table">
                 <thead><tr><th>Folder / Grup</th><th>Judul Catatan</th><th>Tautan Website</th><th>Aksi</th></tr></thead>
-                <tbody id="linkTableBody" class="sortable-container" data-zone="file"></tbody>
+                <tbody id="linkTableBody"></tbody>
             </table>
         </div>
     </div>
@@ -515,47 +519,70 @@
         items.forEach(note => {
             folderHTML += `
                 <div class="note-card" id="card-${tabType}-${note.id}" data-noteid="${note.id}" data-notetitle="${note.title}" data-date="${note.created_at.substring(0,10)}">
-                    <div class="note-header-block">
-                        <div class="drag-file-title-handle" onclick="toggleNoteDetails(event, this)">
-                            <h3><span>${note.title}</span></h3>
-                            <div class="meta-info">📅 ${note.created_at}</div>
+                    <!-- Area Tampilan Data Catatan Biasa -->
+                    <div class="view-mode-area">
+                        <div class="note-header-block">
+                            <div class="drag-file-title-handle" onclick="toggleNoteDetails(event, this)">
+                                <h3><span>${note.title}</span></h3>
+                                <div class="meta-info">📅 ${note.created_at}</div>
+                            </div>
+                            <button class="btn-toggle-note" onclick="toggleNoteDetails(event, this)" style="margin-top:5px;">🔽 Baca</button>
                         </div>
-                        <button class="btn-toggle-note" onclick="toggleNoteDetails(event, this)" style="margin-top:5px;">🔽 Baca</button>
+                        <div class="note-body-content">
+                            <p style="white-space: pre-line; line-height: 1.5; color: var(--text-main); font-size:14px;">${note.content}</p>
+                            
+                            ${note.link ? `<a href="${note.link}" target="_blank" class="note-link">🔗 Kunjungi Website</a>` : ''}
+
+                            <div class="note-gallery">
+                                ${note.photos.map(p => `
+                                    <div class="gallery-item">
+                                        <img src="${p.data}" class="note-img" onclick="window.open(this.src, '_blank')">
+                                        <a href="${p.data}" download="${p.name}" class="btn-download-photo">📥 Simpan</a>
+                                    </div>
+                                `).join('')}
+
+                                ${note.videos.map(v => `
+                                    <div class="video-item">
+                                        <video class="note-video" controls><source src="${v.data}"></video>
+                                        <a href="${v.data}" download="${v.name}" class="btn-download-photo" style="background:#3182ce;">📥 Simpan Vid</a>
+                                    </div>
+                                `).join('')}
+
+                                ${note.docs.map(d => `
+                                    <div class="doc-item">
+                                        <div class="doc-icon">📄</div>
+                                        <div class="doc-name-text" title="${d.name}">${d.name}</div>
+                                        <a href="${d.data}" download="${d.name}" class="btn-download-photo" style="background:#4a5568;">📥 Unduh</a>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <div class="action-bar">
+                                <button onclick="aktifkanModeEditInline('${note.id}', '${tabType}')" class="btn-edit">✏️ Edit</button>
+                                <button onclick="simulasikanHapusTunggal('${note.id}')" class="btn-delete">🗑️ Hapus</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="note-body-content">
-                        <p style="white-space: pre-line; line-height: 1.5; color: var(--text-main); font-size:14px;">${note.content}</p>
-                        
-                        ${note.link ? `<a href="${note.link}" target="_blank" class="note-link">🔗 Kunjungi Website</a>` : ''}
 
-                        <div class="note-gallery">
-                            ${note.photos.map(p => `
-                                <div class="gallery-item">
-                                    <img src="${p.data}" class="note-img" onclick="window.open(this.src, '_blank')">
-                                    <a href="${p.data}" download="${p.name}" class="btn-download-photo">📥 Simpan</a>
-                                </div>
-                            `).join('')}
-
-                            ${note.videos.map(v => `
-                                <div class="video-item">
-                                    <video class="note-video" controls><source src="${v.data}"></video>
-                                    <a href="${v.data}" download="${v.name}" class="btn-download-photo" style="background:#3182ce;">📥 Simpan Vid</a>
-                                </div>
-                            `).join('')}
-
-                            ${note.docs.map(d => `
-                                <div class="doc-item">
-                                    <div class="doc-icon">📄</div>
-                                    <div class="doc-name-text" title="${d.name}">${d.name}</div>
-                                    <a href="${d.data}" download="${d.name}" class="btn-download-photo" style="background:#4a5568;">📥 Unduh</a>
-                                </div>
-                            `).join('')}
-                        </div>
-
-                        <div class="action-bar">
-                            <button onclick="aktifkanModeEdit('${note.id}')" class="btn-edit">✏️ Edit</button>
-                            <button onclick="simulasikanHapusTunggal('${note.id}')" class="btn-delete">🗑️ Hapus</button>
+                    <!-- --- FITUR BARU: INLINE EDIT FORM (MUNCUL DI AREA YANG SAMA TANPA PINDAH LAYAR) --- -->
+                    <div class="inline-edit-area" style="display: none;">
+                        <div class="inline-edit-form">
+                            <label style="font-size:12px; font-weight:bold; color:var(--text-sub);">Ubah Judul:</label>
+                            <input type="text" class="inline-title-input" value="${note.title}">
+                            
+                            <label style="font-size:12px; font-weight:bold; color:var(--text-sub);">Ubah Isi Catatan:</label>
+                            <textarea class="inline-content-input">${note.content}</textarea>
+                            
+                            <label style="font-size:12px; font-weight:bold; color:var(--text-sub);">Ubah Tautan Link:</label>
+                            <input type="text" class="inline-link-input" value="${note.link}">
+                            
+                            <div class="inline-btn-group">
+                                <button onclick="simpanEditInline('${note.id}', this)" class="btn-save-inline">💾 Simpan</button>
+                                <button onclick="batalEditInline(this)" class="btn-reset-filter" style="width:auto; padding:6px 12px;">Batal</button>
+                            </div>
                         </div>
                     </div>
+
                 </div>`;
         });
 
@@ -565,7 +592,6 @@
 
     function simulasikanSimpanCatatan(e) {
         e.preventDefault();
-        let id = document.getElementById("noteId").value;
         let title = document.getElementById("noteTitleInput").value || 'Catatan Tanpa Judul';
         let content = document.getElementById("noteContentInput").value || '(Tidak ada isi)';
         let link = document.getElementById("noteLinkInput").value || '';
@@ -573,54 +599,52 @@
         let selectFolder = document.getElementById("selectFolderInput").value;
         let folder = newFolder || selectFolder || 'Umum / Tanpa Grup';
 
-        if(id) {
-            let note = notes.find(n => n.id === id);
-            if(note) {
-                note.title = title; note.content = content; note.link = link; note.folder = folder;
-                if(tempPhotos.length) note.photos = [...note.photos, ...tempPhotos];
-                if(tempVideos.length) note.videos = [...note.videos, ...tempVideos];
-                if(tempDocs.length) note.docs = [...note.docs, ...tempDocs];
-            }
-        } else {
-            let newNote = {
-                id: Date.now().toString(), title: title, content: content, link: link, folder: folder,
-                photos: tempPhotos, videos: tempVideos, docs: tempDocs,
-                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
-            };
-            notes.unshift(newNote);
-        }
+        let newNote = {
+            id: Date.now().toString(), title: title, content: content, link: link, folder: folder,
+            photos: tempPhotos, videos: tempVideos, docs: tempDocs,
+            created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+        };
+        notes.unshift(newNote);
         
         localStorage.setItem('html_notes_db', JSON.stringify(notes));
         tempPhotos = []; tempVideos = []; tempDocs = [];
-        cancelEditMode();
+        document.getElementById("previewContainer").innerHTML = "";
+        document.getElementById("noteForm").reset();
         renderAllData();
     }
 
-    /* --- PERBAIKAN UTAMA: SINTAKS EROR DI SINI SUDAH FIXED --- */
-    function aktifkanModeEdit(id) {
-        let note = notes.find(n => n.id === id);
-        if(note) {
-            document.getElementById("noteId").value = note.id;
-            document.getElementById("noteTitleInput").value = note.title;
-            document.getElementById("noteContentInput").value = note.content;
-            document.getElementById("noteLinkInput").value = note.link;
-            document.getElementById("newFolderInput").value = note.folder;
-            
-            document.getElementById("formTitle").innerText = '✏️ Mode Ubah Catatan';
-            document.getElementById("btnSubmitForm").innerText = 'Simpan Perubahan';
-            document.getElementById("btnCancelEdit").style.display = 'inline-block'; // Perbaikan sintaks eror .style
-            window.scrollTo({top: 0, behavior: 'smooth'});
+    // AKTIFKAN EDIT LANGSUNG DI DALAM KARTU
+    function aktifkanModeEditInline(id, tabType) {
+        let card = document.getElementById(`card-${tabType}-${id}`);
+        if(card) {
+            card.querySelector('.view-mode-area').style.display = 'none';
+            card.querySelector('.inline-edit-area').style.display = 'block';
         }
     }
 
-    function cancelEditMode() {
-        document.getElementById("noteId").value = "";
-        document.getElementById("formTitle").innerText = '✏️ Tulis Catatan Baru';
-        document.getElementById("btnSubmitForm").innerText = 'Simpan Catatan';
-        document.getElementById("btnCancelEdit").style.display = 'none';
-        document.getElementById("noteForm").reset();
-        document.getElementById("previewContainer").innerHTML = "";
-        tempPhotos = []; tempVideos = []; tempDocs = [];
+    // BATALKAN EDIT INLINE
+    function batalEditInline(buttonElement) {
+        let card = buttonElement.closest('.note-card');
+        card.querySelector('.view-mode-area').style.display = 'block';
+        card.querySelector('.inline-edit-area').style.display = 'none';
+    }
+
+    // SIMPAN EDIT INLINE LANGSUNG KE MEMORI BROWSER
+    function simpanEditInline(id, buttonElement) {
+        let card = buttonElement.closest('.note-card');
+        let newTitle = card.querySelector('.inline-title-input').value || 'Catatan Tanpa Judul';
+        let newContent = card.querySelector('.inline-content-input').value || '(Tidak ada isi)';
+        let newLink = card.querySelector('.inline-link-input').value || '';
+
+        let note = notes.find(n => n.id === id);
+        if(note) {
+            note.title = newTitle;
+            note.content = newContent;
+            note.link = newLink;
+            
+            localStorage.setItem('html_notes_db', JSON.stringify(notes));
+            renderAllData();
+        }
     }
 
     function simulasikanHapusTunggal(id) {
@@ -640,6 +664,7 @@
     }
 
     function simulasikanLogout() { alert('Aplikasi keluar (Simulasi)'); }
+    
     function toggleGroupSection(e, buttonElement) {
         const body = buttonElement.closest('.grup-wrapper').querySelector('.grup-body');
         body.classList.toggle('is-open');
