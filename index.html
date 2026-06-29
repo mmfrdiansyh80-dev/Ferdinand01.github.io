@@ -255,23 +255,20 @@
 </head>
 <body class="mode-auto">
 
-<!-- --- PORTAL AUTHENTICATION SCRREENS --- -->
+<!-- --- FIX TOTAL PORTAL AUTHENTICATION (MURNI DIVISI TANPA TAG FORM REFRESH BROWSER) --- -->
 <div id="authWrapper">
     <!-- Card Login -->
     <div class="auth-card" id="loginCard">
         <h2>🔒 Sign In - Smart Notepad</h2>
         <p>Silakan masuk menggunakan akun terdaftar</p>
         <div class="error-msg" id="loginErrorMsg"></div>
-        <form onsubmit="validasiLoginSystem(event)">
-            <div class="auth-input-container">
-                <input type="text" id="loginUsername" placeholder="Masukkan Username Anda" required autocomplete="off">
-            </div>
-            <div class="auth-input-container">
-                <input type="password" id="loginPassword" placeholder="Masukkan Password Anda" required autocomplete="off">
-            </div>
-            <!-- GANTI TYPE BUTTON: Diubah menjadi type="button" dengan onClick agar aman dari reload otomatis browser -->
-            <button type="button" class="btn-auth-submit" onclick="validasiLoginSystem(event)">Masuk Aplikasi</button>
-        </form>
+        <div class="auth-input-container">
+            <input type="text" id="loginUsername" placeholder="Masukkan Username Anda" autocomplete="off">
+        </div>
+        <div class="auth-input-container">
+            <input type="password" id="loginPassword" placeholder="Masukkan Password Anda" autocomplete="off">
+        </div>
+        <button type="button" class="btn-auth-submit" onclick="validasiLoginSystem()">Masuk Aplikasi</button>
         <div class="auth-toggle-link">Belum punya akun? <span onclick="switchAuthCard('register')">Daftar Akun Baru</span></div>
     </div>
 
@@ -281,15 +278,13 @@
         <p>Buat akun baru untuk mulai menyimpan draf</p>
         <div class="error-msg" id="registerErrorMsg"></div>
         <div class="success-msg" id="registerSuccessMsg"></div>
-        <form onsubmit="eksekusiRegistrasiAkun(event)">
-            <div class="auth-input-container">
-                <input type="text" id="regUsername" placeholder="Buat Username Baru" required autocomplete="off">
-            </div>
-            <div class="auth-input-container">
-                <input type="password" id="regPassword" placeholder="Buat Password Akun" required autocomplete="off">
-            </div>
-            <button type="button" class="btn-auth-submit" style="background:#38a169;" onclick="eksekusiRegistrasiAkun(event)">Daftar Akun Baru</button>
-        </form>
+        <div class="auth-input-container">
+            <input type="text" id="regUsername" placeholder="Buat Username Baru" autocomplete="off">
+        </div>
+        <div class="auth-input-container">
+            <input type="password" id="regPassword" placeholder="Buat Password Akun" autocomplete="off">
+        </div>
+        <button type="button" class="btn-auth-submit" style="background:#38a169;" onclick="eksekusiRegistrasiAkun()">Daftar Akun Baru</button>
         <div class="auth-toggle-link">Sudah punya akun? <span onclick="switchAuthCard('login')">Login di sini</span></div>
     </div>
 </div>
@@ -482,10 +477,8 @@
         }
     }
 
-    // --- FIX UTAMA: Ditambahkan e.preventDefault() menyeluruh untuk cegah refresh paksa browser ---
-    function eksekusiRegistrasiAkun(e) {
-        if(e) e.preventDefault();
-        
+    // --- MANAJEMEN LOGIN DAN REGISTRASI JAVASCRIPT (ANTI-REFRESH) ---
+    function eksekusiRegistrasiAkun() {
         const uName = document.getElementById("regUsername").value.trim().toLowerCase();
         const uPwd = document.getElementById("regPassword").value;
         const regErr = document.getElementById("registerErrorMsg");
@@ -494,7 +487,7 @@
         regErr.innerText = ""; regSucc.innerText = "";
 
         if(!uName || !uPwd) {
-            regErr.innerText = "❌ Kolom tidak boleh kosong!";
+            regErr.innerText = "❌ Kolom tidak boleh ada yang kosong!";
             return;
         }
 
@@ -512,9 +505,7 @@
         document.getElementById("regPassword").value = "";
     }
 
-    function validasiLoginSystem(e) {
-        if(e) e.preventDefault();
-        
+    function validasiLoginSystem() {
         const uNameInput = document.getElementById("loginUsername").value.trim().toLowerCase();
         const uPwdInput = document.getElementById("loginPassword").value;
         const loginErr = document.getElementById("loginErrorMsg");
@@ -522,7 +513,7 @@
         loginErr.innerText = "";
 
         if(!uNameInput || !uPwdInput) {
-            loginErr.innerText = "❌ Kolom tidak boleh kosong!";
+            loginErr.innerText = "❌ Kolom tidak boleh ada yang kosong!";
             return;
         }
 
@@ -653,7 +644,7 @@
         if (ext === 'pdf') return '📕';
         if (['doc', 'docx'].includes(ext)) return '📘';
         if (['xls', 'xlsx'].includes(ext)) return '📗';
-        if (['ppt', 'pptx'].includes(ext)) return '📙';
+        if (['ppt', 'pptx'].includes(ext)) return 'AO';
         if (['zip', 'rar', '7z'].includes(ext)) return '📦';
         if (['psd', 'ai', 'cdr'].includes(ext)) return '🎨';
         if (['txt', 'rtf'].includes(ext)) return '📝';
@@ -672,7 +663,7 @@
         const selectFolder = document.getElementById("selectFolderInput");
         selectFolder.innerHTML = '<option value="">-- Atau Pilih Folder yg Ada --</option>';
         const uniqueFolders = [...new Set(notes.map(n => n.folder || 'Umum / Tanpa Grup'))];
-        uniqueFolders.forEach(f => { selectFolder.innerHTML += `<option value="${f}">${f}</option>'; });
+        uniqueFolders.forEach(f => { selectFolder.innerHTML += `<option value="${f}">${f}</option>`; });
 
         const tabs = ['semua', 'tulisan', 'galeri', 'vid', 'dokumen'];
         tabs.forEach(t => document.getElementById('container-' + t).innerHTML = '');
