@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Notepad Premium - True Local Edit</title>
+    <title>Smart Notepad Premium - Fixed Local Edit</title>
     <style>
         :root {
             --bg-body: #f4f6f9;
@@ -202,18 +202,15 @@
         .link-table { width: 100%; border-collapse: collapse; background: var(--bg-card); min-width: 500px; }
         .link-table th, .link-table td { padding: 10px; font-size: 13px; text-align: left; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
         .link-table th { background: var(--bg-wrapper); }
-        .link-table code { display: inline-block; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
 
         .action-bar { margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border-color); display: flex; gap: 8px; }
         .btn-edit { background: #ecc94b; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .btn-delete { background: #f56565; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .btn-download-photo { display: block; width: 100%; box-sizing: border-box; text-align: center; background: #3182ce; color: #fff; text-decoration: none; font-size: 10px; padding: 4px; margin-top: 4px; border-radius: 4px; font-weight: bold; }
         
-        /* Inline Edit style */
-        .editable-note-title, .note-body-text { transition: background 0.2s; border-radius: 4px; padding: 2px 5px; display: inline-block; width: 100%; box-sizing: border-box; }
-        .editable-note-title:hover, .note-body-text:hover { background: rgba(49, 130, 206, 0.15); cursor: pointer; }
-        .inline-edit-textarea { width: 100%; height: 85px; padding: 8px; font-family: inherit; font-size: 14px; border: 2px solid #3182ce; border-radius: 6px; background: var(--bg-card); color: var(--text-main); box-sizing: border-box; margin: 5px 0; }
-        .inline-edit-title-input { width: 100%; padding: 6px; font-size: 16px; font-weight: bold; border: 2px solid #3182ce; border-radius: 6px; background: var(--bg-card); color: var(--text-main); box-sizing: border-box; }
+        /* Inline Edit Box style */
+        .note-body-text { padding: 5px; border-radius: 4px; display: block; width: 100%; box-sizing: border-box; }
+        .inline-edit-textarea { width: 100%; height: 90px; padding: 8px; font-family: inherit; font-size: 14px; border: 2px solid #3182ce; border-radius: 6px; background: var(--bg-card); color: var(--text-main); box-sizing: border-box; margin: 5px 0; display: block; }
     </style>
 </head>
 <body class="mode-auto">
@@ -231,7 +228,7 @@
 
     <div class="sub-title">Mendukung Penyimpanan Massal, Multi-Upload File Terstruktur</div>
     
-    <!-- FORM UTAMA (Hanya digunakan untuk membuat catatan baru) -->
+    <!-- FORM UTAMA -->
     <div class="notepad-form">
         <h3>✏️ Tulis Catatan Baru</h3>
         <form id="noteForm" onsubmit="simulasikanSimpanCatatan(event)">
@@ -479,7 +476,7 @@
                 document.getElementById('linkTableBody').innerHTML += `
                     <tr data-noteid="${note.id}" data-date="${note.created_at.substring(0,10)}" data-notetitle="${note.title}" data-foldername="${note.folder}">
                         <td>${note.folder}</td>
-                        <td><strong class="editable-note-title" id="inline-title-link-${note.id}" ondblclick="triggerInlineEditFromElement('${note.id}')"><span>${note.title}</span></strong></td>
+                        <td><strong><span>${note.title}</span></strong></td>
                         <td><code title="${note.link}">${note.link}</code></td>
                         <td><a href="${note.link}" target="_blank" style="background: #3182ce; color: #fff; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: bold;">🚀 Buka</a></td>
                     </tr>`;
@@ -513,13 +510,15 @@
                 <div class="note-card" id="card-${tabType}-${note.id}" data-noteid="${note.id}" data-notetitle="${note.title}" data-date="${note.created_at.substring(0,10)}">
                     <div class="note-header-block">
                         <div class="drag-file-title-handle">
-                            <h3 class="editable-note-title" id="inline-title-${tabType}-${note.id}" ondblclick="triggerInlineEditFromElement('${note.id}')"><span>${note.title}</span></h3>
+                            <h3><span>${note.title}</span></h3>
                             <div class="meta-info">📅 ${note.created_at}</div>
                         </div>
                         <button class="btn-toggle-note" onclick="toggleNoteDetails(event, this)" style="margin-top:5px;">🔽 Baca</button>
                     </div>
                     <div class="note-body-content">
-                        <p class="note-body-text" id="inline-content-${tabType}-${note.id}" style="white-space: pre-line; line-height: 1.5; color: var(--text-main); font-size:14px;" ondblclick="triggerInlineEditFromElement('${note.id}')">${note.content}</p>
+                        
+                        <!-- LOKASI EDIT (LINGKARAN BIRU): Menambahkan Event Double Click -->
+                        <p class="note-body-text" id="inline-content-${tabType}-${note.id}" style="white-space: pre-line; line-height: 1.5; color: var(--text-main); font-size:14px;" ondblclick="eksekusiEditDiTempat('${note.id}')">${note.content}</p>
                         
                         ${note.link ? `<a href="${note.link}" target="_blank" class="note-link">🔗 Kunjungi Website</a>` : ''}
 
@@ -546,8 +545,8 @@
                         </div>
 
                         <div class="action-bar">
-                            <!-- PERBAIKAN: Tombol edit langsung mentrigger penggantian kolom input di tempat lokal tanpa pindah scroll -->
-                            <button onclick="triggerInlineEditFromElement('${note.id}')" class="btn-edit">✏️ Edit</button>
+                            <!-- LOKASI TOMBOL EDIT (LINGKARAN MERAH): Memanggil fungsi Edit Di Tempat -->
+                            <button onclick="eksekusiEditDiTempat('${note.id}')" class="btn-edit">✏️ Edit</button>
                             <button onclick="simulasikanHapusTunggal('${note.id}')" class="btn-delete">🗑️ Hapus</button>
                         </div>
                     </div>
@@ -558,79 +557,30 @@
         container.innerHTML += folderHTML;
     }
 
-    // --- FITUR UTAMA PERBAIKAN: AKTIFKAN EDIT DI SATU TEMPAT KARTU LOKAL (TRUE INLINE) ---
-    function triggerInlineEditFromElement(noteId) {
+    // --- FITUR FIX MUTLAK: MENGUBAH TULISAN ISI CATATAN MENJADI TEXTAREA DI TEMPAT (LINGKARAN BIRU) ---
+    function eksekusiEditDiTempat(noteId) {
         let note = notes.find(n => n.id === noteId);
         if(!note) return;
 
         const activeTabId = sessionStorage.getItem("active_tab") || "semua";
-        
-        let titleElement = document.getElementById(`inline-title-${activeTabId}-${noteId}`);
         let contentElement = document.getElementById(`inline-content-${activeTabId}-${noteId}`);
         
-        if (activeTabId === 'tautan') {
-            titleElement = document.getElementById(`inline-title-link-${noteId}`);
-        }
-
-        // Jika element ditemukan pada tab aktif, langsung ubah jadi input box di tempatnya langsung
-        if(titleElement && titleElement.tagName !== 'INPUT') {
-            let currentTitleText = note.title;
-            let inputTitle = document.createElement('input');
-            inputTitle.type = 'text';
-            inputTitle.className = 'inline-edit-title-input';
-            inputTitle.value = currentTitleText;
-            titleElement.replaceWith(inputTitle);
-            inputTitle.focus();
-
-            // Jika sedang membuka isi detail teks catatan, ubah juga kolom isi teksnya
-            if(contentElement && contentElement.tagName !== 'TEXTAREA') {
-                let currentContentText = note.content;
-                let textareaContent = document.createElement('textarea');
-                textareaContent.className = 'inline-edit-textarea';
-                textareaContent.value = currentContentText;
-                contentElement.replaceWith(textareaContent);
-
-                // Fungsi penyimpan gabungan lokal
-                let isSaving = false;
-                let saveBoth = function() {
-                    if(isSaving) return;
-                    isSaving = true;
-                    note.title = inputTitle.value.trim() || 'Catatan Tanpa Judul';
-                    note.content = textareaContent.value.trim() || '(Tidak ada isi)';
-                    localStorage.setItem('html_notes_db', JSON.stringify(notes));
-                    renderAllData();
-                };
-                
-                inputTitle.addEventListener('keydown', (e) => { if(e.key === 'Enter') saveBoth(); });
-                textareaContent.addEventListener('blur', saveBoth);
-            } else {
-                // Jika isi ditutup (baca selengkapnya ditutup), simpan judul saja
-                inputTitle.addEventListener('blur', function() {
-                    note.title = inputTitle.value.trim() || 'Catatan Tanpa Judul';
-                    localStorage.setItem('html_notes_db', JSON.stringify(notes));
-                    renderAllData();
-                });
-                inputTitle.addEventListener('keydown', (e) => {
-                    if(e.key === 'Enter') {
-                        note.title = inputTitle.value.trim() || 'Catatan Tanpa Judul';
-                        localStorage.setItem('html_notes_db', JSON.stringify(notes));
-                        renderAllData();
-                    }
-                });
-            }
-        } else if (contentElement && contentElement.tagName !== 'TEXTAREA') {
-            // Jika double-click di bagian body teks langsung
+        // Cek jika elemen ada dan belum berubah menjadi textarea
+        if (contentElement && contentElement.tagName !== 'TEXTAREA') {
             let currentContentText = note.content;
-            let textareaContent = document.createElement('textarea');
-            textareaContent.className = 'inline-edit-textarea';
-            textareaContent.value = currentContentText;
-            contentElement.replaceWith(textareaContent);
-            textareaContent.focus();
+            let textarea = document.createElement('textarea');
+            textarea.className = 'inline-edit-textarea';
+            textarea.value = currentContentText;
 
-            textareaContent.addEventListener('blur', function() {
-                note.content = textareaContent.value.trim() || '(Tidak ada isi)';
+            // Menggantikan tulisan lama (Lingkaran biru) menjadi textarea pengeditan
+            contentElement.replaceWith(textarea);
+            textarea.focus();
+
+            // Fungsi simpan otomatis saat kursor keluar dari box tulisan
+            textarea.addEventListener('blur', function() {
+                note.content = textarea.value.trim() || '(Tidak ada isi)';
                 localStorage.setItem('html_notes_db', JSON.stringify(notes));
-                renderAllData();
+                renderAllData(); // Segarkan tampilan di tempat
             });
         }
     }
@@ -675,6 +625,7 @@
     }
 
     function simulasikanLogout() { alert('Aplikasi keluar (Simulasi)'); }
+    
     function toggleGroupSection(e, buttonElement) {
         const body = buttonElement.closest('.grup-wrapper').querySelector('.grup-body');
         body.classList.toggle('is-open');
