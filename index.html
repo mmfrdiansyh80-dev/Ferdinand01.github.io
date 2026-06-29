@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Notepad Premium - Advanced Inline Edit</title>
+    <title>Smart Notepad Premium - Clean Inline Edit</title>
     <style>
         :root {
             --bg-body: #f4f6f9;
@@ -109,7 +109,7 @@
 
         .notepad-form h3 { margin-top: 0; color: var(--text-main); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; font-size: 18px; }
         
-        input[type="text"], textarea, select, input[type="date"] { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--textMain); border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        input[type="text"], textarea, select, input[type="date"] { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main); border-radius: 6px; box-sizing: border-box; font-size: 14px; }
         textarea { height: 120px; resize: vertical; }
         
         .folder-flex { display: flex; flex-direction: column; gap: 0; width: 100%; }
@@ -208,7 +208,7 @@
         .btn-delete { background: #f56565; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .btn-download-photo { display: block; width: 100%; box-sizing: border-box; text-align: center; background: #3182ce; color: #fff; text-decoration: none; font-size: 10px; padding: 4px; margin-top: 4px; border-radius: 4px; font-weight: bold; }
         
-        /* Gaya bantu edit instan di tempat */
+        /* Inline Edit Elements style */
         .editable-note-title, .note-body-text { transition: background 0.2s; border-radius: 4px; padding: 2px 5px; }
         .editable-note-title:hover, .note-body-text:hover { background: rgba(49, 130, 206, 0.15); cursor: pointer; }
         .inline-edit-textarea { width: 100%; height: 80px; padding: 8px; font-family: inherit; font-size: 14px; border: 2px solid #3182ce; border-radius: 6px; background: var(--bg-card); color: var(--text-main); box-sizing: border-box; }
@@ -523,14 +523,12 @@
                 <div class="note-card" id="card-${tabType}-${note.id}" data-noteid="${note.id}" data-notetitle="${note.title}" data-date="${note.created_at.substring(0,10)}">
                     <div class="note-header-block">
                         <div class="drag-file-title-handle">
-                            <!-- INTEGRASI FITUR: Double click judul untuk ganti instan -->
                             <h3 class="editable-note-title" ondblclick="makeTitleInlineEditable(this, '${note.id}')"><span>${note.title}</span></h3>
                             <div class="meta-info">📅 ${note.created_at}</div>
                         </div>
                         <button class="btn-toggle-note" onclick="toggleNoteDetails(event, this)" style="margin-top:5px;">🔽 Baca</button>
                     </div>
                     <div class="note-body-content">
-                        <!-- INTEGRASI FITUR: Double click isi teks untuk ganti instan -->
                         <p class="note-body-text" style="white-space: pre-line; line-height: 1.5; color: var(--text-main); font-size:14px;" ondblclick="makeContentInlineEditable(this, '${note.id}')">${note.content}</p>
                         
                         ${note.link ? `<a href="${note.link}" target="_blank" class="note-link">🔗 Kunjungi Website</a>` : ''}
@@ -571,7 +569,6 @@
         container.innerHTML += folderHTML;
     }
 
-    // --- FITUR BARU: INLINE DOUBLE CLICK EDIT (SAVES DIRECTLY IN PLACE) ---
     function makeTitleInlineEditable(element, noteId) {
         let currentText = element.querySelector('span') ? element.querySelector('span').innerText : element.innerText;
         let input = document.createElement('input');
@@ -651,7 +648,7 @@
         renderAllData();
     }
 
-    // REVISI TOMBOL EDIT: Menghilangkan window.scrollTo agar tidak scroll otomatis ke atas form
+    // UPDATE: Tombol edit memindahkan draf murni tanpa memicu scroll atau teks apa pun
     function aktifkanModeEdit(id) {
         let note = notes.find(n => n.id === id);
         if(note) {
@@ -661,12 +658,9 @@
             document.getElementById("noteLinkInput").value = note.link;
             document.getElementById("newFolderInput").value = note.folder;
             
-            document.getElementById("formTitle").innerText = '✏️ Mode Ubah Catatan (Lihat Form Atas)';
+            document.getElementById("formTitle").innerText = '✏️ Mode Ubah Catatan';
             document.getElementById("btnSubmitForm").innerText = 'Simpan Perubahan';
             document.getElementById("btnCancelEdit").style.display = 'inline-block';
-            
-            // Mengirim pemberitahuan visual kecil agar user tahu data sudah terkirim ke form atas
-            alert("Data draf catatan dikirim ke form atas. Layar tidak akan bergulir.");
         }
     }
 
