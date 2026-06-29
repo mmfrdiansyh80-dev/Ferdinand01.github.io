@@ -402,6 +402,7 @@
         applyFiltersAndSorting();
     }
 
+    // Mengonversi Input File ke Base64
     function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -648,7 +649,7 @@
         renderAllData();
     }
 
-    // UPDATE: Tombol edit memindahkan draf murni tanpa memicu scroll atau teks apa pun
+    // FIX: Pesan alert visual sudah dihapus total di sini
     function aktifkanModeEdit(id) {
         let note = notes.find(n => n.id === id);
         if(note) {
