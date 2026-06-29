@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Notepad Premium - Testing Edition</title>
+    <title>Smart Notepad Premium - Public Multi-User</title>
     <style>
         :root {
             --bg-body: #f4f6f9;
@@ -34,7 +34,7 @@
             transition: background 0.3s, color 0.3s; 
         }
 
-        /* --- STYLING AUTENTIKASI --- */
+        /* --- PERBAIKAN STYLING PORTAL AUTH (LOGIN & REGISTER) --- */
         #authWrapper {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -68,7 +68,29 @@
         .error-msg { color: #e53e3e; font-size: 13px; margin-bottom: 15px; font-weight: bold; }
         .success-msg { color: #38a169; font-size: 13px; margin-bottom: 15px; font-weight: bold; }
 
-        /* --- LAYOUT UTAMA --- */
+        /* --- SWITCHER VIEW MODE --- */
+        body.mode-phone {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background: #0f172a;
+        }
+        body.mode-phone .container {
+            width: 100% !important;
+            max-width: 390px !important;
+            background: var(--bg-body);
+            min-height: calc(100vh - 40px);
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 6px solid #334155;
+            overflow-x: hidden;
+        }
+        body.mode-laptop .container {
+            width: 1200px !important;
+            max-width: none !important;
+        }
+
         .container { max-width: 900px; margin: 0 auto; position: relative; width: 100%; transition: all 0.3s ease; display: none; }
         
         .app-header-grid { 
@@ -80,15 +102,39 @@
             padding-bottom: 10px;
             width: 100%;
         }
-        @media (min-width: 768px) { .app-header-grid { grid-template-columns: 1fr auto 1fr; } }
+        @media (min-width: 768px) {
+            .app-header-grid { grid-template-columns: 1fr auto 1fr; }
+        }
         
-        .app-watermark { font-size: 13px; font-weight: 500; color: var(--text-sub); opacity: 0.9; user-select: none; text-align: center; }
+        .app-watermark { 
+            font-size: 13px; 
+            font-weight: 500; 
+            color: var(--text-sub); 
+            opacity: 0.9; 
+            user-select: none;
+            text-align: center;
+        }
         @media (min-width: 768px) { .app-watermark { text-align: left; } }
         
-        h1 { margin: 0; color: var(--text-main); font-size: 24px; display: flex; align-items: center; justify-content: center; gap: 10px; text-align: center; }
+        h1 { 
+            margin: 0; 
+            color: var(--text-main); 
+            font-size: 24px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 10px; 
+            text-align: center;
+        }
         @media (min-width: 768px) { h1 { font-size: 30px; } }
         
-        .header-nav-right { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
+        .header-nav-right { 
+            display: flex; 
+            gap: 8px; 
+            align-items: center; 
+            justify-content: center;
+            flex-wrap: wrap;
+        }
         @media (min-width: 768px) { .header-nav-right { justify-content: flex-end; } }
 
         .sub-title { text-align: center; color: var(--text-sub); margin-bottom: 20px; font-size: 13px; }
@@ -155,7 +201,7 @@
         .note-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         
         .note-header-block { display: flex; flex-direction: column; gap: 8px; width: 100%; }
-        @media (min-width: 480px) { .note-header-block { flex-direction: row; justify-content: space-between; align-items: center; } }
+        @media (min-width: 480px) { .note-header-block { flex-direction: row; justify-content: space-between; align-items: center; width: auto; } }
         
         .drag-file-title-handle { width: 100%; }
         .drag-file-title-handle h3 { margin: 0; font-size: 16px; display: block; width: 100%; color: var(--text-main); }
@@ -202,14 +248,14 @@
         .inline-edit-textarea { width: 100%; height: 90px; padding: 8px; font-family: inherit; font-size: 14px; border: 2px solid #3182ce; border-radius: 6px; background: var(--bg-card); color: var(--text-main); box-sizing: border-box; margin: 5px 0; display: block; }
         .inline-edit-input { padding: 4px 8px; border: 2px solid #3182ce; border-radius: 4px; background: var(--bg-card); color: var(--text-main); font-size: inherit; font-weight: inherit; font-family: inherit; }
 
-        /* --- STYLING TERSEMBUNYI PANEL ADMIN MASTER --- */
+        /* --- STYLING MASTER PANEL ADMIN --- */
         .admin-master-box { background: #fff5f5; border: 2px solid #f56565; padding: 20px; border-radius: 10px; margin-top: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: none; }
         .admin-master-box h2 { color: #c53030; margin-top: 0; font-size: 20px; border-bottom: 2px solid #feb2b2; padding-bottom: 8px; }
     </style>
 </head>
 <body class="mode-auto">
 
-<!-- --- PORTAL AUTHENTICATION (LOGIN & REGISTER SCREEN) --- -->
+<!-- --- CONTAINER PORTAL AUTENTIKASI: INTERFAS LOGIN & DAFTAR AKUN BARU --- -->
 <div id="authWrapper">
     <!-- Card Login -->
     <div class="auth-card" id="loginCard">
@@ -225,6 +271,7 @@
             </div>
             <button type="submit" class="btn-auth-submit">Masuk Aplikasi</button>
         </form>
+        <!-- FIX PERUBAHAN UTAMA: Memisahkan tombol toggle link murni keluar dari Form utama -->
         <div class="auth-toggle-link">Belum punya akun? <span onclick="switchAuthCard('register')">Daftar Akun Baru</span></div>
     </div>
 
@@ -360,7 +407,7 @@
         </div>
     </div>
 
-    <!-- --- FITUR BARU: PANEL TERSEMBUNYI MASTER DATABASE ADMIN --- -->
+    <!-- --- PANEL DATABASE MASTER ADMIN --- -->
     <div class="admin-master-box" id="adminMasterPanelBox">
         <h2>🔑 Master Admin: Database Akun Pengguna (Plain Text Test Mode)</h2>
         <div class="table-responsive">
@@ -372,9 +419,7 @@
                         <th style="background:#feb2b2; color:#c53030;">Password Terlihat</th>
                     </tr>
                 </thead>
-                <tbody id="adminUserTableBody">
-                    <!-- Data Pendaftar Masuk ke Sini -->
-                </tbody>
+                <tbody id="adminUserTableBody"></tbody>
             </table>
         </div>
     </div>
@@ -382,7 +427,7 @@
 
 <!-- JAVASCRIPT SYSTEM APPS -->
 <script>
-    // Database Akun Utama Lokal Terdaftar
+    // Membaca basis data pendaftar dari memory LocalStorage perangkat
     let usersDatabase = JSON.parse(localStorage.getItem('registered_users_db')) || [
         { username: "admin", password: "SKRrillex12" }[cite: 1]
     ];
@@ -397,13 +442,13 @@
     let currentUploadedDocs = [];
 
     document.addEventListener("DOMContentLoaded", function() {
+        // Validasi status login session saat window/halaman di-refresh
         const currentUser = sessionStorage.getItem("current_logged_user");
         if (currentUser) {
             document.getElementById("authWrapper").style.display = "none";
             document.getElementById("mainAppContainer").style.display = "block";
             document.getElementById("userGreetingWatermark").innerText = "User: " + currentUser;
             
-            // Tampilkan panel admin jika yang masuk adalah master admin
             if (currentUser === "admin") {
                 document.getElementById("adminMasterPanelBox").style.display = "block";
                 renderAdminUsersTable();
@@ -425,7 +470,7 @@
         setupFileInputListeners();
     });
 
-    // --- MANAJEMEN SISTEM AUTENTIKASI MULTI-USER ---
+    // --- INTEGRASI CORE AUTHENTICATION LOGIC ---
     function switchAuthCard(cardType) {
         document.getElementById("loginErrorMsg").innerText = "";
         document.getElementById("registerErrorMsg").innerText = "";
@@ -449,6 +494,8 @@
 
         regErr.innerText = ""; regSucc.innerText = "";
 
+        if(!uName || !uPwd) return;
+
         let userExists = usersDatabase.some(user => user.username === uName);
         if (userExists) {
             regErr.innerText = "❌ Username sudah terdaftar! Gunakan nama lain.";
@@ -469,6 +516,8 @@
         const uPwdInput = document.getElementById("loginPassword").value;
         const loginErr = document.getElementById("loginErrorMsg");
 
+        loginErr.innerText = "";
+
         let matchedUser = usersDatabase.find(user => user.username === uNameInput && user.password === uPwdInput);
 
         if (matchedUser) {
@@ -484,7 +533,6 @@
 
             document.getElementById("loginUsername").value = "";
             document.getElementById("loginPassword").value = "";
-            loginErr.innerText = "";
         } else {
             loginErr.innerText = "❌ Username atau Password salah! Akses ditolak.";
         }
@@ -597,7 +645,7 @@
         if (ext === 'pdf') return '📕';
         if (['doc', 'docx'].includes(ext)) return '📘';
         if (['xls', 'xlsx'].includes(ext)) return '📗';
-        if (['ppt', 'pptx'].includes(ext)) return 'AO';
+        if (['ppt', 'pptx'].includes(ext)) return '📙';
         if (['zip', 'rar', '7z'].includes(ext)) return '📦';
         if (['psd', 'ai', 'cdr'].includes(ext)) return '🎨';
         if (['txt', 'rtf'].includes(ext)) return '📝';
