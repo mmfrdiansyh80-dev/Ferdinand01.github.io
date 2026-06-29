@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Notepad Premium - Public Multi-User</title>
+    <title>Smart Notepad Premium - Fixed Multi-User</title>
     <style>
         :root {
             --bg-body: #f4f6f9;
@@ -34,7 +34,7 @@
             transition: background 0.3s, color 0.3s; 
         }
 
-        /* --- PERBAIKAN STYLING PORTAL AUTH (LOGIN & REGISTER) --- */
+        /* --- STYLING PORTAL AUTH (LOGIN & REGISTER) --- */
         #authWrapper {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -201,7 +201,7 @@
         .note-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         
         .note-header-block { display: flex; flex-direction: column; gap: 8px; width: 100%; }
-        @media (min-width: 480px) { .note-header-block { flex-direction: row; justify-content: space-between; align-items: center; width: auto; } }
+        @media (min-width: 480px) { .note-header-block { flex-direction: row; justify-content: space-between; align-items: center; } }
         
         .drag-file-title-handle { width: 100%; }
         .drag-file-title-handle h3 { margin: 0; font-size: 16px; display: block; width: 100%; color: var(--text-main); }
@@ -255,7 +255,7 @@
 </head>
 <body class="mode-auto">
 
-<!-- --- CONTAINER PORTAL AUTENTIKASI: INTERFAS LOGIN & DAFTAR AKUN BARU --- -->
+<!-- --- PORTAL AUTHENTICATION SCRREENS --- -->
 <div id="authWrapper">
     <!-- Card Login -->
     <div class="auth-card" id="loginCard">
@@ -264,14 +264,14 @@
         <div class="error-msg" id="loginErrorMsg"></div>
         <form onsubmit="validasiLoginSystem(event)">
             <div class="auth-input-container">
-                <input type="text" id="loginUsername" placeholder="Masukkan Username Anda" required autocomplete="off" autofocus>
+                <input type="text" id="loginUsername" placeholder="Masukkan Username Anda" required autocomplete="off">
             </div>
             <div class="auth-input-container">
                 <input type="password" id="loginPassword" placeholder="Masukkan Password Anda" required autocomplete="off">
             </div>
-            <button type="submit" class="btn-auth-submit">Masuk Aplikasi</button>
+            <!-- GANTI TYPE BUTTON: Diubah menjadi type="button" dengan onClick agar aman dari reload otomatis browser -->
+            <button type="button" class="btn-auth-submit" onclick="validasiLoginSystem(event)">Masuk Aplikasi</button>
         </form>
-        <!-- FIX PERUBAHAN UTAMA: Memisahkan tombol toggle link murni keluar dari Form utama -->
         <div class="auth-toggle-link">Belum punya akun? <span onclick="switchAuthCard('register')">Daftar Akun Baru</span></div>
     </div>
 
@@ -288,7 +288,7 @@
             <div class="auth-input-container">
                 <input type="password" id="regPassword" placeholder="Buat Password Akun" required autocomplete="off">
             </div>
-            <button type="submit" class="btn-auth-submit" style="background:#38a169;">Daftar Akun Baru</button>
+            <button type="button" class="btn-auth-submit" style="background:#38a169;" onclick="eksekusiRegistrasiAkun(event)">Daftar Akun Baru</button>
         </form>
         <div class="auth-toggle-link">Sudah punya akun? <span onclick="switchAuthCard('login')">Login di sini</span></div>
     </div>
@@ -427,7 +427,6 @@
 
 <!-- JAVASCRIPT SYSTEM APPS -->
 <script>
-    // Membaca basis data pendaftar dari memory LocalStorage perangkat
     let usersDatabase = JSON.parse(localStorage.getItem('registered_users_db')) || [
         { username: "admin", password: "SKRrillex12" }[cite: 1]
     ];
@@ -442,7 +441,6 @@
     let currentUploadedDocs = [];
 
     document.addEventListener("DOMContentLoaded", function() {
-        // Validasi status login session saat window/halaman di-refresh
         const currentUser = sessionStorage.getItem("current_logged_user");
         if (currentUser) {
             document.getElementById("authWrapper").style.display = "none";
@@ -470,7 +468,6 @@
         setupFileInputListeners();
     });
 
-    // --- INTEGRASI CORE AUTHENTICATION LOGIC ---
     function switchAuthCard(cardType) {
         document.getElementById("loginErrorMsg").innerText = "";
         document.getElementById("registerErrorMsg").innerText = "";
@@ -485,8 +482,10 @@
         }
     }
 
+    // --- FIX UTAMA: Ditambahkan e.preventDefault() menyeluruh untuk cegah refresh paksa browser ---
     function eksekusiRegistrasiAkun(e) {
-        e.preventDefault();
+        if(e) e.preventDefault();
+        
         const uName = document.getElementById("regUsername").value.trim().toLowerCase();
         const uPwd = document.getElementById("regPassword").value;
         const regErr = document.getElementById("registerErrorMsg");
@@ -494,7 +493,10 @@
 
         regErr.innerText = ""; regSucc.innerText = "";
 
-        if(!uName || !uPwd) return;
+        if(!uName || !uPwd) {
+            regErr.innerText = "❌ Kolom tidak boleh kosong!";
+            return;
+        }
 
         let userExists = usersDatabase.some(user => user.username === uName);
         if (userExists) {
@@ -511,12 +513,18 @@
     }
 
     function validasiLoginSystem(e) {
-        e.preventDefault();
+        if(e) e.preventDefault();
+        
         const uNameInput = document.getElementById("loginUsername").value.trim().toLowerCase();
         const uPwdInput = document.getElementById("loginPassword").value;
         const loginErr = document.getElementById("loginErrorMsg");
 
         loginErr.innerText = "";
+
+        if(!uNameInput || !uPwdInput) {
+            loginErr.innerText = "❌ Kolom tidak boleh kosong!";
+            return;
+        }
 
         let matchedUser = usersDatabase.find(user => user.username === uNameInput && user.password === uPwdInput);
 
@@ -664,7 +672,7 @@
         const selectFolder = document.getElementById("selectFolderInput");
         selectFolder.innerHTML = '<option value="">-- Atau Pilih Folder yg Ada --</option>';
         const uniqueFolders = [...new Set(notes.map(n => n.folder || 'Umum / Tanpa Grup'))];
-        uniqueFolders.forEach(f => { selectFolder.innerHTML += `<option value="${f}">${f}</option>`; });
+        uniqueFolders.forEach(f => { selectFolder.innerHTML += `<option value="${f}">${f}</option>'; });
 
         const tabs = ['semua', 'tulisan', 'galeri', 'vid', 'dokumen'];
         tabs.forEach(t => document.getElementById('container-' + t).innerHTML = '');
