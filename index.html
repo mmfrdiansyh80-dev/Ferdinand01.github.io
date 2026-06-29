@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Notepad Premium - Multi View Mode</title>
+    <title>Smart Notepad Premium - Fixed View Mode</title>
     <style>
         :root {
             --bg-body: #f4f6f9;
@@ -34,16 +34,16 @@
             transition: background 0.3s, color 0.3s; 
         }
 
-        /* --- FITUR SWITCHER VIEW MODE (HP / LAPTOP / OTOMATIS) --- */
+        /* --- SWITCHER VIEW MODE --- */
         body.mode-phone {
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            background: #0f172a; /* Latar belakang luar emulator */
+            background: #0f172a;
         }
         body.mode-phone .container {
             width: 100% !important;
-            max-width: 390px !important; /* Standar Lebar Layar HP */
+            max-width: 390px !important;
             background: var(--bg-body);
             min-height: calc(100vh - 40px);
             padding: 15px;
@@ -197,7 +197,6 @@
         .doc-icon { font-size: 30px; }
         .doc-name-text { font-size: 11px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 5px; }
 
-        /* Pembungkus Tabel Responsif agar di HP tidak merusak layout */
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid var(--border-color); }
         .link-table { width: 100%; border-collapse: collapse; background: var(--bg-card); min-width: 500px; }
         .link-table th, .link-table td { padding: 10px; font-size: 13px; text-align: left; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
@@ -217,7 +216,6 @@
         <div class="app-watermark">Dibuat oleh _eymefrd26_</div>
         <h1>📝 Notepad Super Premium</h1>
         <div class="header-nav-right">
-            <!-- TOMBOL BARU SWITCHING MODE TAMPILAN -->
             <button class="btn-view-toggle" id="viewToggleBtn" onclick="toggleViewMode()">📱 Mode: Otomatis</button>
             <button class="btn-theme-toggle" id="themeToggleBtn" onclick="toggleThemeSystem()">☀️ Light Mode</button>
             <button class="btn-logout" onclick="simulasikanLogout()">🚪 Sign Out</button>
@@ -346,7 +344,6 @@
         document.documentElement.setAttribute("data-theme", savedTheme);
         document.getElementById("themeToggleBtn").innerText = savedTheme === "dark" ? "🌙 Dark Mode" : "☀️ Light Mode";
 
-        // Memulihkan mode tampilan terakhir dari memory
         const savedViewMode = localStorage.getItem("notepad_view_mode") || "auto";
         currentViewIndex = viewModes.indexOf(savedViewMode);
         applyViewModeStyles(savedViewMode);
@@ -355,7 +352,6 @@
         setupFileInputListeners();
     });
 
-    // --- FITUR BARU: TOGGLE SCREEN VIEW MODE ---
     function toggleViewMode() {
         currentViewIndex = (currentViewIndex + 1) % viewModes.length;
         let selectedMode = viewModes[currentViewIndex];
@@ -366,7 +362,6 @@
     function applyViewModeStyles(mode) {
         const body = document.body;
         const btn = document.getElementById("viewToggleBtn");
-        
         body.classList.remove('mode-auto', 'mode-phone', 'mode-laptop');
         
         if (mode === 'auto') {
@@ -601,6 +596,7 @@
         renderAllData();
     }
 
+    /* --- PERBAIKAN UTAMA: SINTAKS EROR DI SINI SUDAH FIXED --- */
     function aktifkanModeEdit(id) {
         let note = notes.find(n => n.id === id);
         if(note) {
@@ -609,9 +605,10 @@
             document.getElementById("noteContentInput").value = note.content;
             document.getElementById("noteLinkInput").value = note.link;
             document.getElementById("newFolderInput").value = note.folder;
+            
             document.getElementById("formTitle").innerText = '✏️ Mode Ubah Catatan';
             document.getElementById("btnSubmitForm").innerText = 'Simpan Perubahan';
-            document.getElementById("btnCancelEdit").style.style.display = 'inline-block';
+            document.getElementById("btnCancelEdit").style.display = 'inline-block'; // Perbaikan sintaks eror .style
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
     }
