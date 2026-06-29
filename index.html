@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Notepad Premium - Full System App</title>
+    <title>Smart Notepad Premium - Full Document Support</title>
     <style>
         :root {
             --bg-body: #f4f6f9;
@@ -34,32 +34,30 @@
             transition: background 0.3s, color 0.3s; 
         }
 
-        /* --- STYLING GERBANG SECURE SIGN IN --- */
-        #loginGateContainer {
+        /* --- STYLING LAYAR SIGN IN / LOCKSCREEN --- */
+        #lockscreenWrapper {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #1a202c;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 90vh;
-            width: 100%;
+            z-index: 99999;
         }
-        .login-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            width: 100%;
-            max-width: 380px;
-            text-align: center;
-            box-sizing: border-box;
+        .login-card { 
+            background: #fff; padding: 40px; border-radius: 12px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; 
+            max-width: 380px; text-align: center; box-sizing: border-box; 
         }
-        .login-card h2 { margin: 0 0 10px 0; color: var(--text-main); font-size: 24px; }
-        .login-card p { color: var(--text-sub); font-size: 14px; margin-bottom: 25px; }
+        .login-card h2 { margin: 0 0 10px 0; color: #2d3748; font-size: 24px; }
+        .login-card p { color: #718096; font-size: 14px; margin-bottom: 25px; }
         .password-container { position: relative; width: 100%; margin-bottom: 15px; }
-        .login-pwd-input { width: 100%; padding: 12px 45px 12px 15px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-main); border-radius: 6px; box-sizing: border-box; font-size: 15px; text-align: center; }
-        .login-pwd-input:focus { border-color: #3182ce; outline: none; }
-        .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px; user-select: none; color: var(--text-sub); }
-        .btn-login { background: #3182ce; color: #fff; border: none; width: 100%; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        input[type="password"], input[type="text"].pwd-input { 
+            width: 100%; padding: 12px 45px 12px 15px; border: 2px solid #cbd5e0; 
+            border-radius: 6px; box-sizing: border-box; font-size: 15px; text-align: center; 
+        }
+        .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px; user-select: none; color: #718096; }
+        .btn-login { background: #3182ce; color: #fff; border: none; width: 100%; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
         .btn-login:hover { background: #2b6cb0; }
         .error-msg { color: #e53e3e; font-size: 13px; margin-bottom: 15px; font-weight: bold; }
 
@@ -86,7 +84,7 @@
             max-width: none !important;
         }
 
-        .container { max-width: 900px; margin: 0 auto; position: relative; width: 100%; transition: all 0.3s ease; }
+        .container { max-width: 900px; margin: 0 auto; position: relative; width: 100%; transition: all 0.3s ease; display: none; }
         
         .app-header-grid { 
             display: grid; 
@@ -246,31 +244,29 @@
 </head>
 <body class="mode-auto">
 
-<!-- --- NEW SECTION: SCREEN GERBANG SIGN IN --- -->
-<div id="loginGateContainer">
+<!-- --- FITUR BARU: LAYAR LOCKSCREEN KUNCI SIGN IN UTAMA --- -->
+<div id="lockscreenWrapper">
     <div class="login-card">
         <h2>🔒 Notepad Terkunci</h2>
         <p>Silakan masukkan password untuk mengakses data</p>
-        <div id="loginErrorMsg" class="error-msg"></div>
-        <form onsubmit="eksekusiSignInSistem(event)">
+        <div class="error-msg" id="loginErrorMsg"></div>
+        <form onsubmit="validasiLoginSystem(event)">
             <div class="password-container">
-                <input type="password" id="gatePasswordInput" class="login-pwd-input" placeholder="Masukkan Password Anda" required autocomplete="off" autofocus>
-                <span class="toggle-password" id="eyeIcon" onclick="toggleGatePasswordVisibility()">👁️</span>
+                <input type="password" id="notepadPassword" placeholder="Masukkan Password Anda" required autocomplete="off" autofocus>
+                <span class="toggle-password" id="eyeIcon" onclick="togglePasswordVisibility()">👁️</span>
             </div>
             <button type="submit" class="btn-login">Masuk Aplikasi</button>
         </form>
     </div>
 </div>
 
-<!-- --- INI ADALAH HALAMAN UTAMA NOTEPAD YANG AKAN DI-LOCK / UNLOCK --- -->
-<div class="container" id="mainNotepadAppContainer" style="display: none;">
+<div class="container" id="mainAppContainer">
     <div class="app-header-grid">
         <div class="app-watermark">Dibuat oleh _eymefrd26_</div>
         <h1>📝 Notepad Super Premium</h1>
         <div class="header-nav-right">
             <button class="btn-view-toggle" id="viewToggleBtn" onclick="toggleViewMode()">📱 Mode: Otomatis</button>
             <button class="btn-theme-toggle" id="themeToggleBtn" onclick="toggleThemeSystem()">☀️ Light Mode</button>
-            <!-- UPDATE: Tombol Sign Out diubah memanggil fungsi logout instan pembatas secure -->
             <button class="btn-logout" onclick="simulasikanLogout()">🚪 Sign Out</button>
         </div>
     </div>
@@ -379,9 +375,6 @@
 
 <!-- JAVASCRIPT SYSTEM APPS -->
 <script>
-    // --- UTAMA: PASSWORD UTAMA GERBANG SESUAI FILE ASLI ANDA ---
-    const VALID_PASSWORD = "_eymefrd26_"; 
-
     let notes = JSON.parse(localStorage.getItem('html_notes_db')) || [];
     let mediaBlobsStore = {};
     let viewModes = ['auto', 'phone', 'laptop'];
@@ -391,59 +384,13 @@
     let currentUploadedVideos = [];
     let currentUploadedDocs = [];
 
-    // --- SECURE SECURITY GATE CONTROL (FRONTEND SESSIONS) ---
-    function jalankanVerifikasiCekSession() {
-        const statusLogin = sessionStorage.getItem("notepad_logged_in");
-        const gate = document.getElementById("loginGateContainer");
-        const app = document.getElementById("mainNotepadAppContainer");
-
-        if (statusLogin === "true") {
-            gate.style.display = "none";
-            app.style.display = "block";
-            renderAllData();
-        } else {
-            gate.style.display = "flex";
-            app.style.display = "none";
-        }
-    }
-
-    function eksekusiSignInSistem(e) {
-        e.preventDefault();
-        const inputPass = document.getElementById("gatePasswordInput").value;
-        const errMsg = document.getElementById("loginErrorMsg");
-
-        if (inputPass === VALID_PASSWORD) {
-            sessionStorage.setItem("notepad_logged_in", "true");
-            errMsg.innerText = "";
-            document.getElementById("gatePasswordInput").value = "";
-            jalankanVerifikasiCekSession();
-        } else {
-            errMsg.innerText = "❌ Password Salah! Akses Notepad Ditolak.";
-        }
-    }
-
-    function simulasikanLogout() {
-        if(confirm('Apakah Anda yakin ingin keluar?')) {
-            sessionStorage.removeItem("notepad_logged_in"); // Kunci kembali halaman
-            jalankanVerifikasiCekSession(); // Tampilkan kotak login bawaan
-        }
-    }
-
-    function toggleGatePasswordVisibility() {
-        const passInput = document.getElementById("gatePasswordInput");
-        const eyeIcon = document.getElementById("eyeIcon");
-        if (passInput.type === "password") {
-            passInput.type = "text";
-            eyeIcon.innerText = "🙈";
-        } else {
-            passInput.type = "password";
-            eyeIcon.innerText = "👁️";
-        }
-    }
-
     document.addEventListener("DOMContentLoaded", function() {
-        // Cek login status pertama kali aplikasi dibuka
-        jalankanVerifikasiCekSession();
+        // --- PROSES VALIDASI STATUS LOGIN SAAT REFRESH ---
+        const loginStatus = sessionStorage.getItem("notepad_logged_in");
+        if (loginStatus === "true") {
+            document.getElementById("lockscreenWrapper").style.display = "none";
+            document.getElementById("mainAppContainer").style.display = "block";
+        }
 
         const activeTab = sessionStorage.getItem("active_tab") || "semua";
         switchTab(activeTab);
@@ -456,8 +403,47 @@
         currentViewIndex = viewModes.indexOf(savedViewMode);
         applyViewModeStyles(savedViewMode);
 
+        renderAllData();
         setupFileInputListeners();
     });
+
+    // --- LOGIKA SISTEM LOGIN PASSWORD BARU ---
+    function validasiLoginSystem(e) {
+        e.preventDefault();
+        const pwdInput = document.getElementById("notepadPassword").value;
+        const errMsg = document.getElementById("loginErrorMsg");
+
+        if (pwdInput === "SKRrillex12") {
+            sessionStorage.setItem("notepad_logged_in", "true");
+            document.getElementById("lockscreenWrapper").style.display = "none";
+            document.getElementById("mainAppContainer").style.display = "block";
+            document.getElementById("notepadPassword").value = "";
+            errMsg.innerText = "";
+        } else {
+            errMsg.innerText = "❌ Password Salah! Akses Notepad Ditolak.";
+        }
+    }
+
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById("notepadPassword");
+        const eyeIcon = document.getElementById("eyeIcon");
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            eyeIcon.innerText = "🙈";
+        } else {
+            passwordInput.type = "password";
+            eyeIcon.innerText = "👁️";
+        }
+    }
+
+    // --- KOREKSI TOMBOL SIGN OUT: Kembali ke Lockscreen tanpa hapus data localStorage ---
+    function simulasikanLogout() {
+        if(confirm('Apakah Anda yakin ingin keluar dari aplikasi?')) {
+            sessionStorage.removeItem("notepad_logged_in");
+            document.getElementById("lockscreenWrapper").style.display = "flex";
+            document.getElementById("mainAppContainer").style.display = "none";
+        }
+    }
 
     function toggleViewMode() {
         currentViewIndex = (currentViewIndex + 1) % viewModes.length;
@@ -503,6 +489,20 @@
         applyFiltersAndSorting();
     }
 
+    function toggleGroupSection(e, buttonElement) {
+        const body = buttonElement.closest('.grup-wrapper').querySelector('.grup-body');
+        body.classList.toggle('is-open');
+        buttonElement.innerText = body.classList.contains('is-open') ? "📁 Tutup" : "📂 Buka";
+    }
+
+    function toggleNoteDetails(e, triggerElement) {
+        const noteCard = triggerElement.closest('.note-card');
+        const bodyContent = noteCard.querySelector('.note-body-content');
+        const btn = noteCard.querySelector('.btn-toggle-note');
+        bodyContent.classList.toggle('is-open');
+        if (btn) btn.innerText = bodyContent.classList.contains('is-open') ? "🔼 Tutup" : "🔽 Baca";
+    }
+
     function setupFileInputListeners() {
         document.getElementById('photoInput').addEventListener('change', function(e) {
             currentUploadedPhotos = [];
@@ -543,7 +543,7 @@
         if (ext === 'pdf') return '📕';
         if (['doc', 'docx'].includes(ext)) return '📘';
         if (['xls', 'xlsx'].includes(ext)) return '📗';
-        if (['ppt', 'pptx'].includes(ext)) return '📙';
+        if (['ppt', 'pptx'].includes(ext)) return 'AO';
         if (['zip', 'rar', '7z'].includes(ext)) return '📦';
         if (['psd', 'ai', 'cdr'].includes(ext)) return '🎨';
         if (['txt', 'rtf'].includes(ext)) return '📝';
@@ -559,8 +559,6 @@
     }
 
     function renderAllData() {
-        if(sessionStorage.getItem("notepad_logged_in") !== "true") return;
-
         const selectFolder = document.getElementById("selectFolderInput");
         selectFolder.innerHTML = '<option value="">-- Atau Pilih Folder yg Ada --</option>';
         const uniqueFolders = [...new Set(notes.map(n => n.folder || 'Umum / Tanpa Grup'))];
@@ -896,20 +894,6 @@
             localStorage.setItem('html_notes_db', JSON.stringify(notes));
             renderAllData();
         }
-    }
-
-    function toggleGroupSection(e, buttonElement) {
-        const body = buttonElement.closest('.grup-wrapper').querySelector('.grup-body');
-        body.classList.toggle('is-open');
-        buttonElement.innerText = body.classList.contains('is-open') ? "📁 Tutup" : "📂 Buka";
-    }
-
-    function toggleNoteDetails(e, triggerElement) {
-        const noteCard = triggerElement.closest('.note-card');
-        const bodyContent = noteCard.querySelector('.note-body-content');
-        const btn = noteCard.querySelector('.btn-toggle-note');
-        bodyContent.classList.toggle('is-open');
-        if (btn) btn.innerText = bodyContent.classList.contains('is-open') ? "🔼 Tutup" : "🔽 Baca";
     }
 
     function applyFiltersAndSorting() {
