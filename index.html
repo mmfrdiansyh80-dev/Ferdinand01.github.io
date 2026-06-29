@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Notepad Premium - Public Multi-User</title>
+    <title>Smart Notepad Premium - Testing Edition</title>
     <style>
         :root {
             --bg-body: #f4f6f9;
@@ -34,7 +34,7 @@
             transition: background 0.3s, color 0.3s; 
         }
 
-        /* --- PERBAIKAN STYLING PORTAL AUTH (LOGIN & REGISTER) --- */
+        /* --- STYLING AUTENTIKASI --- */
         #authWrapper {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -68,29 +68,7 @@
         .error-msg { color: #e53e3e; font-size: 13px; margin-bottom: 15px; font-weight: bold; }
         .success-msg { color: #38a169; font-size: 13px; margin-bottom: 15px; font-weight: bold; }
 
-        /* --- SWITCHER VIEW MODE --- */
-        body.mode-phone {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            background: #0f172a;
-        }
-        body.mode-phone .container {
-            width: 100% !important;
-            max-width: 390px !important;
-            background: var(--bg-body);
-            min-height: calc(100vh - 40px);
-            padding: 15px;
-            border-radius: 20px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border: 6px solid #334155;
-            overflow-x: hidden;
-        }
-        body.mode-laptop .container {
-            width: 1200px !important;
-            max-width: none !important;
-        }
-
+        /* --- LAYOUT UTAMA --- */
         .container { max-width: 900px; margin: 0 auto; position: relative; width: 100%; transition: all 0.3s ease; display: none; }
         
         .app-header-grid { 
@@ -102,39 +80,15 @@
             padding-bottom: 10px;
             width: 100%;
         }
-        @media (min-width: 768px) {
-            .app-header-grid { grid-template-columns: 1fr auto 1fr; }
-        }
+        @media (min-width: 768px) { .app-header-grid { grid-template-columns: 1fr auto 1fr; } }
         
-        .app-watermark { 
-            font-size: 13px; 
-            font-weight: 500; 
-            color: var(--text-sub); 
-            opacity: 0.9; 
-            user-select: none;
-            text-align: center;
-        }
+        .app-watermark { font-size: 13px; font-weight: 500; color: var(--text-sub); opacity: 0.9; user-select: none; text-align: center; }
         @media (min-width: 768px) { .app-watermark { text-align: left; } }
         
-        h1 { 
-            margin: 0; 
-            color: var(--text-main); 
-            font-size: 24px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            gap: 10px; 
-            text-align: center;
-        }
+        h1 { margin: 0; color: var(--text-main); font-size: 24px; display: flex; align-items: center; justify-content: center; gap: 10px; text-align: center; }
         @media (min-width: 768px) { h1 { font-size: 30px; } }
         
-        .header-nav-right { 
-            display: flex; 
-            gap: 8px; 
-            align-items: center; 
-            justify-content: center;
-            flex-wrap: wrap;
-        }
+        .header-nav-right { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
         @media (min-width: 768px) { .header-nav-right { justify-content: flex-end; } }
 
         .sub-title { text-align: center; color: var(--text-sub); margin-bottom: 20px; font-size: 13px; }
@@ -247,13 +201,17 @@
         .editable-folder-title:hover, .editable-note-title:hover, .note-body-text:hover { background: rgba(49, 130, 206, 0.15); cursor: pointer; }
         .inline-edit-textarea { width: 100%; height: 90px; padding: 8px; font-family: inherit; font-size: 14px; border: 2px solid #3182ce; border-radius: 6px; background: var(--bg-card); color: var(--text-main); box-sizing: border-box; margin: 5px 0; display: block; }
         .inline-edit-input { padding: 4px 8px; border: 2px solid #3182ce; border-radius: 4px; background: var(--bg-card); color: var(--text-main); font-size: inherit; font-weight: inherit; font-family: inherit; }
+
+        /* --- STYLING TERSEMBUNYI PANEL ADMIN MASTER --- */
+        .admin-master-box { background: #fff5f5; border: 2px solid #f56565; padding: 20px; border-radius: 10px; margin-top: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: none; }
+        .admin-master-box h2 { color: #c53030; margin-top: 0; font-size: 20px; border-bottom: 2px solid #feb2b2; padding-bottom: 8px; }
     </style>
 </head>
 <body class="mode-auto">
 
-<!-- --- CONTAINER PORTAL AUTENTIKASI: INTERFAS LOGIN & DAFTAR AKUN BARU --- -->
+<!-- --- PORTAL AUTHENTICATION (LOGIN & REGISTER SCREEN) --- -->
 <div id="authWrapper">
-    <!-- Form Sign In -->
+    <!-- Card Login -->
     <div class="auth-card" id="loginCard">
         <h2>🔒 Sign In - Smart Notepad</h2>
         <p>Silakan masuk menggunakan akun terdaftar</p>
@@ -270,7 +228,7 @@
         <div class="auth-toggle-link">Belum punya akun? <span onclick="switchAuthCard('register')">Daftar Akun Baru</span></div>
     </div>
 
-    <!-- Form Registrasi Akun Baru -->
+    <!-- Card Registrasi -->
     <div class="auth-card" id="registerCard" style="display:none;">
         <h2>📝 Registrasi Akun Publik</h2>
         <p>Buat akun baru untuk mulai menyimpan draf</p>
@@ -401,13 +359,32 @@
             </table>
         </div>
     </div>
+
+    <!-- --- FITUR BARU: PANEL TERSEMBUNYI MASTER DATABASE ADMIN --- -->
+    <div class="admin-master-box" id="adminMasterPanelBox">
+        <h2>🔑 Master Admin: Database Akun Pengguna (Plain Text Test Mode)</h2>
+        <div class="table-responsive">
+            <table class="link-table" style="min-width: 100%;">
+                <thead>
+                    <tr>
+                        <th style="background:#feb2b2; color:#c53030;">No</th>
+                        <th style="background:#feb2b2; color:#c53030;">Username Pendaftar</th>
+                        <th style="background:#feb2b2; color:#c53030;">Password Terlihat</th>
+                    </tr>
+                </thead>
+                <tbody id="adminUserTableBody">
+                    <!-- Data Pendaftar Masuk ke Sini -->
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <!-- JAVASCRIPT SYSTEM APPS -->
 <script>
-    // Inisialisasi basis data akun pengguna terdaftar lokal
+    // Database Akun Utama Lokal Terdaftar
     let usersDatabase = JSON.parse(localStorage.getItem('registered_users_db')) || [
-        { username: "admin", password: "SKRrillex12" } // Akun utama default bawaan Anda[cite: 1]
+        { username: "admin", password: "SKRrillex12" }[cite: 1]
     ];
 
     let notes = JSON.parse(localStorage.getItem('html_notes_db')) || [];
@@ -420,12 +397,17 @@
     let currentUploadedDocs = [];
 
     document.addEventListener("DOMContentLoaded", function() {
-        // Cek status session login saat halaman di-refresh
         const currentUser = sessionStorage.getItem("current_logged_user");
         if (currentUser) {
             document.getElementById("authWrapper").style.display = "none";
             document.getElementById("mainAppContainer").style.display = "block";
             document.getElementById("userGreetingWatermark").innerText = "User: " + currentUser;
+            
+            // Tampilkan panel admin jika yang masuk adalah master admin
+            if (currentUser === "admin") {
+                document.getElementById("adminMasterPanelBox").style.display = "block";
+                renderAdminUsersTable();
+            }
         }
 
         const activeTab = sessionStorage.getItem("active_tab") || "semua";
@@ -443,7 +425,7 @@
         setupFileInputListeners();
     });
 
-    // --- LOGIKA REGISTER & LOGIN MULTI-USER ---
+    // --- MANAJEMEN SISTEM AUTENTIKASI MULTI-USER ---
     function switchAuthCard(cardType) {
         document.getElementById("loginErrorMsg").innerText = "";
         document.getElementById("registerErrorMsg").innerText = "";
@@ -465,8 +447,7 @@
         const regErr = document.getElementById("registerErrorMsg");
         const regSucc = document.getElementById("registerSuccessMsg");
 
-        regErr.innerText = "";
-        regSucc.innerText = "";
+        regErr.innerText = ""; regSucc.innerText = "";
 
         let userExists = usersDatabase.some(user => user.username === uName);
         if (userExists) {
@@ -477,7 +458,7 @@
         usersDatabase.push({ username: uName, password: uPwd });
         localStorage.setItem('registered_users_db', JSON.stringify(usersDatabase));
 
-        regSucc.innerText = "✅ Akun Berhasil Terdaftar! Silakan kembali klik 'Login di sini'.";
+        regSucc.innerText = "✅ Akun Berhasil Terdaftar! Silakan klik 'Login di sini'.";
         document.getElementById("regUsername").value = "";
         document.getElementById("regPassword").value = "";
     }
@@ -496,6 +477,11 @@
             document.getElementById("mainAppContainer").style.display = "block";
             document.getElementById("userGreetingWatermark").innerText = "User: " + matchedUser.username;
             
+            if (matchedUser.username === "admin") {
+                document.getElementById("adminMasterPanelBox").style.display = "block";
+                renderAdminUsersTable();
+            }
+
             document.getElementById("loginUsername").value = "";
             document.getElementById("loginPassword").value = "";
             loginErr.innerText = "";
@@ -504,9 +490,23 @@
         }
     }
 
+    function renderAdminUsersTable() {
+        const tbody = document.getElementById("adminUserTableBody");
+        tbody.innerHTML = "";
+        usersDatabase.forEach((user, index) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><strong>${user.username}</strong> ${user.username === 'admin' ? '<span style="color:#e53e3e;">(Master Pemilik)</span>' : ''}</td>
+                    <td><code>${user.password}</code></td>
+                </tr>`;
+        });
+    }
+
     function simulasikanLogout() {
         if(confirm('Apakah Anda yakin ingin Sign Out? Semua data catatan Anda tersimpan aman.')) {
             sessionStorage.removeItem("current_logged_user");
+            document.getElementById("adminMasterPanelBox").style.display = "none";
             document.getElementById("authWrapper").style.display = "flex";
             document.getElementById("mainAppContainer").style.display = "none";
             switchAuthCard('login');
@@ -557,29 +557,6 @@
         applyFiltersAndSorting();
     }
 
-    function toggleGroupSection(e, buttonElement) {
-        const body = buttonElement.closest('.grup-wrapper').querySelector('.grup-body');
-        body.classList.toggle('is-open');
-        buttonElement.innerText = body.classList.contains('is-open') ? "📁 Tutup" : "📂 Buka";
-    }
-
-    function toggleNoteDetails(e, triggerElement) {
-        const noteCard = triggerElement.closest('.note-card');
-        const bodyContent = noteCard.querySelector('.note-body-content');
-        const btn = noteCard.querySelector('.btn-toggle-note');
-        bodyContent.classList.toggle('is-open');
-        if (btn) btn.innerText = bodyContent.classList.contains('is-open') ? "🔼 Tutup" : "🔽 Baca";
-    }
-
-    function fileToBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve({ name: file.name, data: reader.result });
-            reader.onerror = error => reject(error);
-        });
-    }
-
     function setupFileInputListeners() {
         document.getElementById('photoInput').addEventListener('change', function(e) {
             currentUploadedPhotos = [];
@@ -620,7 +597,7 @@
         if (ext === 'pdf') return '📕';
         if (['doc', 'docx'].includes(ext)) return '📘';
         if (['xls', 'xlsx'].includes(ext)) return '📗';
-        if (['ppt', 'pptx'].includes(ext)) return '📙';
+        if (['ppt', 'pptx'].includes(ext)) return 'AO';
         if (['zip', 'rar', '7z'].includes(ext)) return '📦';
         if (['psd', 'ai', 'cdr'].includes(ext)) return '🎨';
         if (['txt', 'rtf'].includes(ext)) return '📝';
