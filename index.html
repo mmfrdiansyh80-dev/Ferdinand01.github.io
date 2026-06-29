@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Notepad Premium - Full Document Support</title>
+    <title>Smart Notepad Premium - Public Multi-User</title>
     <style>
         :root {
             --bg-body: #f4f6f9;
@@ -34,32 +34,39 @@
             transition: background 0.3s, color 0.3s; 
         }
 
-        /* --- STYLING LAYAR SIGN IN / LOCKSCREEN --- */
-        #lockscreenWrapper {
+        /* --- PERBAIKAN STYLING PORTAL AUTH (LOGIN & REGISTER) --- */
+        #authWrapper {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
             background: #1a202c;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 99999;
+            z-index: 999999;
         }
-        .login-card { 
+        .auth-card { 
             background: #fff; padding: 40px; border-radius: 12px; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; 
             max-width: 380px; text-align: center; box-sizing: border-box; 
         }
-        .login-card h2 { margin: 0 0 10px 0; color: #2d3748; font-size: 24px; }
-        .login-card p { color: #718096; font-size: 14px; margin-bottom: 25px; }
-        .password-container { position: relative; width: 100%; margin-bottom: 15px; }
-        input[type="password"], input[type="text"].pwd-input { 
-            width: 100%; padding: 12px 45px 12px 15px; border: 2px solid #cbd5e0; 
-            border-radius: 6px; box-sizing: border-box; font-size: 15px; text-align: center; 
+        .auth-card h2 { margin: 0 0 10px 0; color: #2d3748; font-size: 24px; }
+        .auth-card p { color: #718096; font-size: 14px; margin-bottom: 25px; }
+        
+        .auth-input-container { position: relative; width: 100%; margin-bottom: 15px; }
+        .auth-input-container input { 
+            width: 100%; padding: 12px; border: 2px solid #cbd5e0; 
+            border-radius: 6px; box-sizing: border-box; font-size: 14px; text-align: center; 
         }
-        .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px; user-select: none; color: #718096; }
-        .btn-login { background: #3182ce; color: #fff; border: none; width: 100%; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .btn-login:hover { background: #2b6cb0; }
+        .auth-input-container input:focus { border-color: #3182ce; outline: none; }
+        
+        .btn-auth-submit { background: #3182ce; color: #fff; border: none; width: 100%; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .btn-auth-submit:hover { background: #2b6cb0; }
+        
+        .auth-toggle-link { margin-top: 20px; font-size: 13px; color: #718096; }
+        .auth-toggle-link span { color: #3182ce; cursor: pointer; font-weight: bold; text-decoration: underline; }
+        
         .error-msg { color: #e53e3e; font-size: 13px; margin-bottom: 15px; font-weight: bold; }
+        .success-msg { color: #38a169; font-size: 13px; margin-bottom: 15px; font-weight: bold; }
 
         /* --- SWITCHER VIEW MODE --- */
         body.mode-phone {
@@ -218,7 +225,7 @@
         
         .video-item { background: var(--bg-body); padding: 6px; border-radius: 8px; border: 1px solid var(--border-color); width: 100%; box-sizing: border-box; }
         @media (min-width: 480px) { .video-item { width: 220px; } }
-        .note-video { width: 100%; height: 130px; border-radius: 6px; background: #000; display: block; }
+        .note-video { width: 100%; height: 130px; border-radius: 6px; background: #000; }
         
         .doc-item { background: var(--bg-card); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); width: calc(50% - 5px); text-align: center; box-sizing: border-box; }
         @media (min-width: 480px) { .doc-item { width: 140px; } }
@@ -244,25 +251,48 @@
 </head>
 <body class="mode-auto">
 
-<!-- --- FITUR BARU: LAYAR LOCKSCREEN KUNCI SIGN IN UTAMA --- -->
-<div id="lockscreenWrapper">
-    <div class="login-card">
-        <h2>🔒 Notepad Terkunci</h2>
-        <p>Silakan masukkan password untuk mengakses data</p>
+<!-- --- CONTAINER PORTAL AUTENTIKASI: INTERFAS LOGIN & DAFTAR AKUN BARU --- -->
+<div id="authWrapper">
+    <!-- Form Sign In -->
+    <div class="auth-card" id="loginCard">
+        <h2>🔒 Sign In - Smart Notepad</h2>
+        <p>Silakan masuk menggunakan akun terdaftar</p>
         <div class="error-msg" id="loginErrorMsg"></div>
         <form onsubmit="validasiLoginSystem(event)">
-            <div class="password-container">
-                <input type="password" id="notepadPassword" placeholder="Masukkan Password Anda" required autocomplete="off" autofocus>
-                <span class="toggle-password" id="eyeIcon" onclick="togglePasswordVisibility()">👁️</span>
+            <div class="auth-input-container">
+                <input type="text" id="loginUsername" placeholder="Masukkan Username Anda" required autocomplete="off" autofocus>
             </div>
-            <button type="submit" class="btn-login">Masuk Aplikasi</button>
+            <div class="auth-input-container">
+                <input type="password" id="loginPassword" placeholder="Masukkan Password Anda" required autocomplete="off">
+            </div>
+            <button type="submit" class="btn-auth-submit">Masuk Aplikasi</button>
         </form>
+        <div class="auth-toggle-link">Belum punya akun? <span onclick="switchAuthCard('register')">Daftar Akun Baru</span></div>
+    </div>
+
+    <!-- Form Registrasi Akun Baru -->
+    <div class="auth-card" id="registerCard" style="display:none;">
+        <h2>📝 Registrasi Akun Publik</h2>
+        <p>Buat akun baru untuk mulai menyimpan draf</p>
+        <div class="error-msg" id="registerErrorMsg"></div>
+        <div class="success-msg" id="registerSuccessMsg"></div>
+        <form onsubmit="eksekusiRegistrasiAkun(event)">
+            <div class="auth-input-container">
+                <input type="text" id="regUsername" placeholder="Buat Username Baru" required autocomplete="off">
+            </div>
+            <div class="auth-input-container">
+                <input type="password" id="regPassword" placeholder="Buat Password Akun" required autocomplete="off">
+            </div>
+            <button type="submit" class="btn-auth-submit" style="background:#38a169;">Daftar Akun Baru</button>
+        </form>
+        <div class="auth-toggle-link">Sudah punya akun? <span onclick="switchAuthCard('login')">Login di sini</span></div>
     </div>
 </div>
 
+<!-- --- NOTEPAD MAIN APPLICATION --- -->
 <div class="container" id="mainAppContainer">
     <div class="app-header-grid">
-        <div class="app-watermark">Dibuat oleh _eymefrd26_</div>
+        <div class="app-watermark" id="userGreetingWatermark">User: Guest</div>
         <h1>📝 Notepad Super Premium</h1>
         <div class="header-nav-right">
             <button class="btn-view-toggle" id="viewToggleBtn" onclick="toggleViewMode()">📱 Mode: Otomatis</button>
@@ -375,6 +405,11 @@
 
 <!-- JAVASCRIPT SYSTEM APPS -->
 <script>
+    // Inisialisasi basis data akun pengguna terdaftar lokal
+    let usersDatabase = JSON.parse(localStorage.getItem('registered_users_db')) || [
+        { username: "admin", password: "SKRrillex12" } // Akun utama default bawaan Anda[cite: 1]
+    ];
+
     let notes = JSON.parse(localStorage.getItem('html_notes_db')) || [];
     let mediaBlobsStore = {};
     let viewModes = ['auto', 'phone', 'laptop'];
@@ -385,11 +420,12 @@
     let currentUploadedDocs = [];
 
     document.addEventListener("DOMContentLoaded", function() {
-        // --- PROSES VALIDASI STATUS LOGIN SAAT REFRESH ---
-        const loginStatus = sessionStorage.getItem("notepad_logged_in");
-        if (loginStatus === "true") {
-            document.getElementById("lockscreenWrapper").style.display = "none";
+        // Cek status session login saat halaman di-refresh
+        const currentUser = sessionStorage.getItem("current_logged_user");
+        if (currentUser) {
+            document.getElementById("authWrapper").style.display = "none";
             document.getElementById("mainAppContainer").style.display = "block";
+            document.getElementById("userGreetingWatermark").innerText = "User: " + currentUser;
         }
 
         const activeTab = sessionStorage.getItem("active_tab") || "semua";
@@ -407,41 +443,73 @@
         setupFileInputListeners();
     });
 
-    // --- LOGIKA SISTEM LOGIN PASSWORD BARU ---
+    // --- LOGIKA REGISTER & LOGIN MULTI-USER ---
+    function switchAuthCard(cardType) {
+        document.getElementById("loginErrorMsg").innerText = "";
+        document.getElementById("registerErrorMsg").innerText = "";
+        document.getElementById("registerSuccessMsg").innerText = "";
+        
+        if (cardType === 'register') {
+            document.getElementById("loginCard").style.display = "none";
+            document.getElementById("registerCard").style.display = "block";
+        } else {
+            document.getElementById("loginCard").style.display = "block";
+            document.getElementById("registerCard").style.display = "none";
+        }
+    }
+
+    function eksekusiRegistrasiAkun(e) {
+        e.preventDefault();
+        const uName = document.getElementById("regUsername").value.trim().toLowerCase();
+        const uPwd = document.getElementById("regPassword").value;
+        const regErr = document.getElementById("registerErrorMsg");
+        const regSucc = document.getElementById("registerSuccessMsg");
+
+        regErr.innerText = "";
+        regSucc.innerText = "";
+
+        let userExists = usersDatabase.some(user => user.username === uName);
+        if (userExists) {
+            regErr.innerText = "❌ Username sudah terdaftar! Gunakan nama lain.";
+            return;
+        }
+
+        usersDatabase.push({ username: uName, password: uPwd });
+        localStorage.setItem('registered_users_db', JSON.stringify(usersDatabase));
+
+        regSucc.innerText = "✅ Akun Berhasil Terdaftar! Silakan kembali klik 'Login di sini'.";
+        document.getElementById("regUsername").value = "";
+        document.getElementById("regPassword").value = "";
+    }
+
     function validasiLoginSystem(e) {
         e.preventDefault();
-        const pwdInput = document.getElementById("notepadPassword").value;
-        const errMsg = document.getElementById("loginErrorMsg");
+        const uNameInput = document.getElementById("loginUsername").value.trim().toLowerCase();
+        const uPwdInput = document.getElementById("loginPassword").value;
+        const loginErr = document.getElementById("loginErrorMsg");
 
-        if (pwdInput === "SKRrillex12") {
-            sessionStorage.setItem("notepad_logged_in", "true");
-            document.getElementById("lockscreenWrapper").style.display = "none";
+        let matchedUser = usersDatabase.find(user => user.username === uNameInput && user.password === uPwdInput);
+
+        if (matchedUser) {
+            sessionStorage.setItem("current_logged_user", matchedUser.username);
+            document.getElementById("authWrapper").style.display = "none";
             document.getElementById("mainAppContainer").style.display = "block";
-            document.getElementById("notepadPassword").value = "";
-            errMsg.innerText = "";
+            document.getElementById("userGreetingWatermark").innerText = "User: " + matchedUser.username;
+            
+            document.getElementById("loginUsername").value = "";
+            document.getElementById("loginPassword").value = "";
+            loginErr.innerText = "";
         } else {
-            errMsg.innerText = "❌ Password Salah! Akses Notepad Ditolak.";
+            loginErr.innerText = "❌ Username atau Password salah! Akses ditolak.";
         }
     }
 
-    function togglePasswordVisibility() {
-        const passwordInput = document.getElementById("notepadPassword");
-        const eyeIcon = document.getElementById("eyeIcon");
-        if (passwordInput.type === "password") {
-            passwordInput.type = "text";
-            eyeIcon.innerText = "🙈";
-        } else {
-            passwordInput.type = "password";
-            eyeIcon.innerText = "👁️";
-        }
-    }
-
-    // --- KOREKSI TOMBOL SIGN OUT: Kembali ke Lockscreen tanpa hapus data localStorage ---
     function simulasikanLogout() {
-        if(confirm('Apakah Anda yakin ingin keluar dari aplikasi?')) {
-            sessionStorage.removeItem("notepad_logged_in");
-            document.getElementById("lockscreenWrapper").style.display = "flex";
+        if(confirm('Apakah Anda yakin ingin Sign Out? Semua data catatan Anda tersimpan aman.')) {
+            sessionStorage.removeItem("current_logged_user");
+            document.getElementById("authWrapper").style.display = "flex";
             document.getElementById("mainAppContainer").style.display = "none";
+            switchAuthCard('login');
         }
     }
 
@@ -503,6 +571,15 @@
         if (btn) btn.innerText = bodyContent.classList.contains('is-open') ? "🔼 Tutup" : "🔽 Baca";
     }
 
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve({ name: file.name, data: reader.result });
+            reader.onerror = error => reject(error);
+        });
+    }
+
     function setupFileInputListeners() {
         document.getElementById('photoInput').addEventListener('change', function(e) {
             currentUploadedPhotos = [];
@@ -543,7 +620,7 @@
         if (ext === 'pdf') return '📕';
         if (['doc', 'docx'].includes(ext)) return '📘';
         if (['xls', 'xlsx'].includes(ext)) return '📗';
-        if (['ppt', 'pptx'].includes(ext)) return 'AO';
+        if (['ppt', 'pptx'].includes(ext)) return '📙';
         if (['zip', 'rar', '7z'].includes(ext)) return '📦';
         if (['psd', 'ai', 'cdr'].includes(ext)) return '🎨';
         if (['txt', 'rtf'].includes(ext)) return '📝';
@@ -930,12 +1007,6 @@
         document.getElementById('sortOrder').value = "default";
         renderAllData();
     }
-
-    document.addEventListener("click", function(e) {
-        if (!e.target.closest('#searchQuery') && !e.target.closest('#searchSuggestions')) {
-            document.getElementById('searchSuggestions').style.display = "none";
-        }
-    });
 
     function md5(string) { return btoa(encodeURIComponent(string)).substring(0, 10); }
 </script>
