@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Notepad Premium - Clean Inline Edit</title>
+    <title>Smart Notepad Premium - True Local Edit</title>
     <style>
         :root {
             --bg-body: #f4f6f9;
@@ -166,10 +166,11 @@
 
         .note-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         
-        .note-header-block { display: flex; flex-direction: column; gap: 8px; }
+        .note-header-block { display: flex; flex-direction: column; gap: 8px; width: 100%; }
         @media (min-width: 480px) { .note-header-block { flex-direction: row; justify-content: space-between; align-items: center; } }
         
-        .drag-file-title-handle h3 { margin: 0; font-size: 16px; }
+        .drag-file-title-handle { width: 100%; }
+        .drag-file-title-handle h3 { margin: 0; font-size: 16px; display: block; width: 100%; }
         .meta-info { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
         
         .note-body-content { display: none; margin-top: 15px; padding-top: 12px; border-top: 1px dashed var(--border-color); }
@@ -208,10 +209,10 @@
         .btn-delete { background: #f56565; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .btn-download-photo { display: block; width: 100%; box-sizing: border-box; text-align: center; background: #3182ce; color: #fff; text-decoration: none; font-size: 10px; padding: 4px; margin-top: 4px; border-radius: 4px; font-weight: bold; }
         
-        /* Inline Edit Elements style */
-        .editable-note-title, .note-body-text { transition: background 0.2s; border-radius: 4px; padding: 2px 5px; }
+        /* Inline Edit style */
+        .editable-note-title, .note-body-text { transition: background 0.2s; border-radius: 4px; padding: 2px 5px; display: inline-block; width: 100%; box-sizing: border-box; }
         .editable-note-title:hover, .note-body-text:hover { background: rgba(49, 130, 206, 0.15); cursor: pointer; }
-        .inline-edit-textarea { width: 100%; height: 80px; padding: 8px; font-family: inherit; font-size: 14px; border: 2px solid #3182ce; border-radius: 6px; background: var(--bg-card); color: var(--text-main); box-sizing: border-box; }
+        .inline-edit-textarea { width: 100%; height: 85px; padding: 8px; font-family: inherit; font-size: 14px; border: 2px solid #3182ce; border-radius: 6px; background: var(--bg-card); color: var(--text-main); box-sizing: border-box; margin: 5px 0; }
         .inline-edit-title-input { width: 100%; padding: 6px; font-size: 16px; font-weight: bold; border: 2px solid #3182ce; border-radius: 6px; background: var(--bg-card); color: var(--text-main); box-sizing: border-box; }
     </style>
 </head>
@@ -230,11 +231,10 @@
 
     <div class="sub-title">Mendukung Penyimpanan Massal, Multi-Upload File Terstruktur</div>
     
-    <!-- FORM UTAMA -->
+    <!-- FORM UTAMA (Hanya digunakan untuk membuat catatan baru) -->
     <div class="notepad-form">
-        <h3 id="formTitle">✏️ Tulis Catatan Baru</h3>
+        <h3>✏️ Tulis Catatan Baru</h3>
         <form id="noteForm" onsubmit="simulasikanSimpanCatatan(event)">
-            <input type="hidden" id="noteId" value="">
             <input type="text" id="noteTitleInput" placeholder="Judul Catatan (Bisa dikosongkan)">
             <div class="folder-flex">
                 <input type="text" id="newFolderInput" placeholder="📁 Buat Nama Folder Baru (Misal: Kuliah, Kerja)">
@@ -257,8 +257,7 @@
             
             <div class="preview-container" id="previewContainer"></div>
             <div style="margin-top: 15px;">
-                <button type="submit" class="btn-submit" id="btnSubmitForm">Simpan Catatan</button>
-                <button type="button" class="btn-reset-filter" id="btnCancelEdit" style="display:none; margin-top: 5px;" onclick="cancelEditMode()">Batal</button>
+                <button type="submit" class="btn-submit">Simpan Catatan</button>
             </div>
         </form>
     </div>
@@ -298,27 +297,27 @@
     <!-- DATA VIEWER CONTAINER -->
     <div id="semua" class="tab-content active">
         <h2>Daftar Riwayat Catatan Lengkap</h2>
-        <div class="folder-list-container sortable-container" data-zone="folder" id="container-semua"></div>
+        <div class="folder-list-container" id="container-semua"></div>
     </div>
 
     <div id="tulisan" class="tab-content">
         <h2>📝 Pusat Catatan Teks Fokus</h2>
-        <div class="folder-list-container sortable-container" data-zone="folder" id="container-tulisan"></div>
+        <div class="folder-list-container" id="container-tulisan"></div>
     </div>
 
     <div id="galeri" class="tab-content">
         <h2>🖼️ Pusat Gambar Terstruktur</h2>
-        <div class="folder-list-container sortable-container" data-zone="folder" id="container-galeri"></div>
+        <div class="folder-list-container" id="container-galeri"></div>
     </div>
 
     <div id="vid" class="tab-content">
         <h2>🎬 Pusat File Video Terstruktur</h2>
-        <div class="folder-list-container sortable-container" data-zone="folder" id="container-vid"></div>
+        <div class="folder-list-container" id="container-vid"></div>
     </div>
 
     <div id="dokumen" class="tab-content">
         <h2>🗂️ Pusat File Dokumen & Mentahan Desain</h2>
-        <div class="folder-list-container sortable-container" data-zone="folder" id="container-dokumen"></div>
+        <div class="folder-list-container" id="container-dokumen"></div>
     </div>
 
     <div id="tautan" class="tab-content">
@@ -326,7 +325,7 @@
         <div class="table-responsive">
             <table class="link-table">
                 <thead><tr><th>Folder / Grup</th><th>Judul Catatan</th><th>Tautan Website</th><th>Aksi</th></tr></thead>
-                <tbody id="linkTableBody" class="sortable-container" data-zone="file"></tbody>
+                <tbody id="linkTableBody"></tbody>
             </table>
         </div>
     </div>
@@ -402,7 +401,6 @@
         applyFiltersAndSorting();
     }
 
-    // Mengonversi Input File ke Base64
     function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -415,28 +413,19 @@
     function setupFileInputListeners() {
         document.getElementById('photoInput').addEventListener('change', async function(e) {
             tempPhotos = [];
-            for (let file of e.target.files) {
-                let res = await fileToBase64(file);
-                tempPhotos.push(res);
-            }
+            for (let file of e.target.files) { let res = await fileToBase64(file); tempPhotos.push(res); }
             renderPreviews();
         });
 
         document.getElementById('videoInput').addEventListener('change', async function(e) {
             tempVideos = [];
-            for (let file of e.target.files) {
-                let res = await fileToBase64(file);
-                tempVideos.push(res);
-            }
+            for (let file of e.target.files) { let res = await fileToBase64(file); tempVideos.push(res); }
             renderPreviews();
         });
 
         document.getElementById('docInput').addEventListener('change', async function(e) {
             tempDocs = [];
-            for (let file of e.target.files) {
-                let res = await fileToBase64(file);
-                tempDocs.push(res);
-            }
+            for (let file of e.target.files) { let res = await fileToBase64(file); tempDocs.push(res); }
             renderPreviews();
         });
     }
@@ -490,7 +479,7 @@
                 document.getElementById('linkTableBody').innerHTML += `
                     <tr data-noteid="${note.id}" data-date="${note.created_at.substring(0,10)}" data-notetitle="${note.title}" data-foldername="${note.folder}">
                         <td>${note.folder}</td>
-                        <td><strong class="editable-note-title" ondblclick="makeTitleInlineEditable(this, '${note.id}')"><span>${note.title}</span></strong></td>
+                        <td><strong class="editable-note-title" id="inline-title-link-${note.id}" ondblclick="triggerInlineEditFromElement('${note.id}')"><span>${note.title}</span></strong></td>
                         <td><code title="${note.link}">${note.link}</code></td>
                         <td><a href="${note.link}" target="_blank" style="background: #3182ce; color: #fff; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: bold;">🚀 Buka</a></td>
                     </tr>`;
@@ -524,13 +513,13 @@
                 <div class="note-card" id="card-${tabType}-${note.id}" data-noteid="${note.id}" data-notetitle="${note.title}" data-date="${note.created_at.substring(0,10)}">
                     <div class="note-header-block">
                         <div class="drag-file-title-handle">
-                            <h3 class="editable-note-title" ondblclick="makeTitleInlineEditable(this, '${note.id}')"><span>${note.title}</span></h3>
+                            <h3 class="editable-note-title" id="inline-title-${tabType}-${note.id}" ondblclick="triggerInlineEditFromElement('${note.id}')"><span>${note.title}</span></h3>
                             <div class="meta-info">📅 ${note.created_at}</div>
                         </div>
                         <button class="btn-toggle-note" onclick="toggleNoteDetails(event, this)" style="margin-top:5px;">🔽 Baca</button>
                     </div>
                     <div class="note-body-content">
-                        <p class="note-body-text" style="white-space: pre-line; line-height: 1.5; color: var(--text-main); font-size:14px;" ondblclick="makeContentInlineEditable(this, '${note.id}')">${note.content}</p>
+                        <p class="note-body-text" id="inline-content-${tabType}-${note.id}" style="white-space: pre-line; line-height: 1.5; color: var(--text-main); font-size:14px;" ondblclick="triggerInlineEditFromElement('${note.id}')">${note.content}</p>
                         
                         ${note.link ? `<a href="${note.link}" target="_blank" class="note-link">🔗 Kunjungi Website</a>` : ''}
 
@@ -541,14 +530,12 @@
                                     <a href="${p.data}" download="${p.name}" class="btn-download-photo">📥 Simpan</a>
                                 </div>
                             `).join('')}
-
                             ${note.videos.map(v => `
                                 <div class="video-item">
                                     <video class="note-video" controls><source src="${v.data}"></video>
                                     <a href="${v.data}" download="${v.name}" class="btn-download-photo" style="background:#3182ce;">📥 Simpan Vid</a>
                                 </div>
                             `).join('')}
-
                             ${note.docs.map(d => `
                                 <div class="doc-item">
                                     <div class="doc-icon">📄</div>
@@ -559,7 +546,8 @@
                         </div>
 
                         <div class="action-bar">
-                            <button onclick="aktifkanModeEdit('${note.id}')" class="btn-edit">✏️ Edit</button>
+                            <!-- PERBAIKAN: Tombol edit langsung mentrigger penggantian kolom input di tempat lokal tanpa pindah scroll -->
+                            <button onclick="triggerInlineEditFromElement('${note.id}')" class="btn-edit">✏️ Edit</button>
                             <button onclick="simulasikanHapusTunggal('${note.id}')" class="btn-delete">🗑️ Hapus</button>
                         </div>
                     </div>
@@ -570,55 +558,85 @@
         container.innerHTML += folderHTML;
     }
 
-    function makeTitleInlineEditable(element, noteId) {
-        let currentText = element.querySelector('span') ? element.querySelector('span').innerText : element.innerText;
-        let input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'inline-edit-title-input';
-        input.value = currentText;
+    // --- FITUR UTAMA PERBAIKAN: AKTIFKAN EDIT DI SATU TEMPAT KARTU LOKAL (TRUE INLINE) ---
+    function triggerInlineEditFromElement(noteId) {
+        let note = notes.find(n => n.id === noteId);
+        if(!note) return;
 
-        element.replaceWith(input);
-        input.focus();
-
-        function saveInlineTitle() {
-            let val = input.value.trim() || 'Catatan Tanpa Judul';
-            let note = notes.find(n => n.id === noteId);
-            if(note) {
-                note.title = val;
-                localStorage.setItem('html_notes_db', JSON.stringify(notes));
-            }
-            renderAllData();
+        const activeTabId = sessionStorage.getItem("active_tab") || "semua";
+        
+        let titleElement = document.getElementById(`inline-title-${activeTabId}-${noteId}`);
+        let contentElement = document.getElementById(`inline-content-${activeTabId}-${noteId}`);
+        
+        if (activeTabId === 'tautan') {
+            titleElement = document.getElementById(`inline-title-link-${noteId}`);
         }
 
-        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') saveInlineTitle(); });
-        input.addEventListener('blur', saveInlineTitle);
-    }
+        // Jika element ditemukan pada tab aktif, langsung ubah jadi input box di tempatnya langsung
+        if(titleElement && titleElement.tagName !== 'INPUT') {
+            let currentTitleText = note.title;
+            let inputTitle = document.createElement('input');
+            inputTitle.type = 'text';
+            inputTitle.className = 'inline-edit-title-input';
+            inputTitle.value = currentTitleText;
+            titleElement.replaceWith(inputTitle);
+            inputTitle.focus();
 
-    function makeContentInlineEditable(element, noteId) {
-        let currentText = element.innerText;
-        let textarea = document.createElement('textarea');
-        textarea.className = 'inline-edit-textarea';
-        textarea.value = currentText;
+            // Jika sedang membuka isi detail teks catatan, ubah juga kolom isi teksnya
+            if(contentElement && contentElement.tagName !== 'TEXTAREA') {
+                let currentContentText = note.content;
+                let textareaContent = document.createElement('textarea');
+                textareaContent.className = 'inline-edit-textarea';
+                textareaContent.value = currentContentText;
+                contentElement.replaceWith(textareaContent);
 
-        element.replaceWith(textarea);
-        textarea.focus();
-
-        function saveInlineContent() {
-            let val = textarea.value.trim() || '(Tidak ada isi)';
-            let note = notes.find(n => n.id === noteId);
-            if(note) {
-                note.content = val;
-                localStorage.setItem('html_notes_db', JSON.stringify(notes));
+                // Fungsi penyimpan gabungan lokal
+                let isSaving = false;
+                let saveBoth = function() {
+                    if(isSaving) return;
+                    isSaving = true;
+                    note.title = inputTitle.value.trim() || 'Catatan Tanpa Judul';
+                    note.content = textareaContent.value.trim() || '(Tidak ada isi)';
+                    localStorage.setItem('html_notes_db', JSON.stringify(notes));
+                    renderAllData();
+                };
+                
+                inputTitle.addEventListener('keydown', (e) => { if(e.key === 'Enter') saveBoth(); });
+                textareaContent.addEventListener('blur', saveBoth);
+            } else {
+                // Jika isi ditutup (baca selengkapnya ditutup), simpan judul saja
+                inputTitle.addEventListener('blur', function() {
+                    note.title = inputTitle.value.trim() || 'Catatan Tanpa Judul';
+                    localStorage.setItem('html_notes_db', JSON.stringify(notes));
+                    renderAllData();
+                });
+                inputTitle.addEventListener('keydown', (e) => {
+                    if(e.key === 'Enter') {
+                        note.title = inputTitle.value.trim() || 'Catatan Tanpa Judul';
+                        localStorage.setItem('html_notes_db', JSON.stringify(notes));
+                        renderAllData();
+                    }
+                });
             }
-            renderAllData();
-        }
+        } else if (contentElement && contentElement.tagName !== 'TEXTAREA') {
+            // Jika double-click di bagian body teks langsung
+            let currentContentText = note.content;
+            let textareaContent = document.createElement('textarea');
+            textareaContent.className = 'inline-edit-textarea';
+            textareaContent.value = currentContentText;
+            contentElement.replaceWith(textareaContent);
+            textareaContent.focus();
 
-        textarea.addEventListener('blur', saveInlineContent);
+            textareaContent.addEventListener('blur', function() {
+                note.content = textareaContent.value.trim() || '(Tidak ada isi)';
+                localStorage.setItem('html_notes_db', JSON.stringify(notes));
+                renderAllData();
+            });
+        }
     }
 
     function simulasikanSimpanCatatan(e) {
         e.preventDefault();
-        let id = document.getElementById("noteId").value;
         let title = document.getElementById("noteTitleInput").value || 'Catatan Tanpa Judul';
         let content = document.getElementById("noteContentInput").value || '(Tidak ada isi)';
         let link = document.getElementById("noteLinkInput").value || '';
@@ -626,53 +644,18 @@
         let selectFolder = document.getElementById("selectFolderInput").value;
         let folder = newFolder || selectFolder || 'Umum / Tanpa Grup';
 
-        if(id) {
-            let note = notes.find(n => n.id === id);
-            if(note) {
-                note.title = title; note.content = content; note.link = link; note.folder = folder;
-                if(tempPhotos.length) note.photos = [...note.photos, ...tempPhotos];
-                if(tempVideos.length) note.videos = [...note.videos, ...tempVideos];
-                if(tempDocs.length) note.docs = [...note.docs, ...tempDocs];
-            }
-        } else {
-            let newNote = {
-                id: Date.now().toString(), title: title, content: content, link: link, folder: folder,
-                photos: tempPhotos, videos: tempVideos, docs: tempDocs,
-                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
-            };
-            notes.unshift(newNote);
-        }
+        let newNote = {
+            id: Date.now().toString(), title: title, content: content, link: link, folder: folder,
+            photos: tempPhotos, videos: tempVideos, docs: tempDocs,
+            created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+        };
+        notes.unshift(newNote);
         
         localStorage.setItem('html_notes_db', JSON.stringify(notes));
         tempPhotos = []; tempVideos = []; tempDocs = [];
-        cancelEditMode();
-        renderAllData();
-    }
-
-    // FIX: Pesan alert visual sudah dihapus total di sini
-    function aktifkanModeEdit(id) {
-        let note = notes.find(n => n.id === id);
-        if(note) {
-            document.getElementById("noteId").value = note.id;
-            document.getElementById("noteTitleInput").value = note.title;
-            document.getElementById("noteContentInput").value = note.content;
-            document.getElementById("noteLinkInput").value = note.link;
-            document.getElementById("newFolderInput").value = note.folder;
-            
-            document.getElementById("formTitle").innerText = '✏️ Mode Ubah Catatan';
-            document.getElementById("btnSubmitForm").innerText = 'Simpan Perubahan';
-            document.getElementById("btnCancelEdit").style.display = 'inline-block';
-        }
-    }
-
-    function cancelEditMode() {
-        document.getElementById("noteId").value = "";
-        document.getElementById("formTitle").innerText = '✏️ Tulis Catatan Baru';
-        document.getElementById("btnSubmitForm").innerText = 'Simpan Catatan';
-        document.getElementById("btnCancelEdit").style.display = 'none';
         document.getElementById("noteForm").reset();
         document.getElementById("previewContainer").innerHTML = "";
-        tempPhotos = []; tempVideos = []; tempDocs = [];
+        renderAllData();
     }
 
     function simulasikanHapusTunggal(id) {
@@ -730,7 +713,6 @@
                 card.style.display = (matchesDate && matchesSearch) ? "" : "none";
                 if (matchesDate && matchesSearch) visibleCardsCount++;
             });
-            
             wrapper.style.display = (visibleCardsCount > 0) ? "" : "none";
         });
     }
