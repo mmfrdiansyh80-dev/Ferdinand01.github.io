@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Notepad Premium - Full Fixed Version</title>
+    <title>Smart Notepad Premium - Clean Media Gallery</title>
     <style>
         :root {
             --bg-body: #f4f6f9;
@@ -304,18 +304,19 @@
         <div class="folder-list-container" id="container-tulisan"></div>
     </div>
 
+    <!-- TAB MEDIA: Dibuat bersih tanpa teks detail draf -->
     <div id="galeri" class="tab-content">
-        <h2>🖼️ Pusat Gambar Terstruktur</h2>
+        <h2>🖼️ Pusat Gambar Terstruktur Clean View</h2>
         <div class="folder-list-container" id="container-galeri"></div>
     </div>
 
     <div id="vid" class="tab-content">
-        <h2>🎬 Pusat File Video Terstruktur</h2>
+        <h2>🎬 Pusat File Video Terstruktur Clean View</h2>
         <div class="folder-list-container" id="container-vid"></div>
     </div>
 
     <div id="dokumen" class="tab-content">
-        <h2>🗂️ Pusat File Dokumen & Mentahan Desain</h2>
+        <h2>🗂️ Pusat File Dokumen Clean View</h2>
         <div class="folder-list-container" id="container-dokumen"></div>
     </div>
 
@@ -456,19 +457,22 @@
 
         for (let folderName in groups) {
             let items = groups[folderName];
+            
+            // Render Tab Reguler teks bawaan
             buildFolderHTML('semua', folderName, items);
             
             let textOnly = items.filter(n => !n.photos.length && !n.videos.length && !n.docs.length && !n.link);
             if(textOnly.length) buildFolderHTML('tulisan', folderName, textOnly);
 
+            // REVISI: Render Tab Khusus Media menggunakan fungsi "buildCleanMediaFolderHTML" agar bersih tanpa draf
             let hasPhotos = items.filter(n => n.photos.length);
-            if(hasPhotos.length) buildFolderHTML('galeri', folderName, hasPhotos, 'photos');
+            if(hasPhotos.length) buildCleanMediaFolderHTML('galeri', folderName, hasPhotos, 'photos');
 
             let hasVideos = items.filter(n => n.videos.length);
-            if(hasVideos.length) buildFolderHTML('vid', folderName, hasVideos, 'videos');
+            if(hasVideos.length) buildCleanMediaFolderHTML('vid', folderName, hasVideos, 'videos');
 
             let hasDocs = items.filter(n => n.docs.length);
-            if(hasDocs.length) buildFolderHTML('dokumen', folderName, hasDocs, 'docs');
+            if(hasDocs.length) buildCleanMediaFolderHTML('dokumen', folderName, hasDocs, 'docs');
         }
 
         let hasLinks = false;
@@ -508,7 +512,6 @@
                     <div class="note-grid" data-zone="file">`;
 
         items.forEach(note => {
-            // FIX VARIABEL UTAMA: Mengubah target-draf-isi agar akurat mengikat variable note.id bawaan objek perulangan
             folderHTML += `
                 <div class="note-card" id="card-${tabType}-${note.id}" data-noteid="${note.id}" data-notetitle="${note.title}" data-date="${note.created_at.substring(0,10)}">
                     <div class="note-header-block">
@@ -559,6 +562,63 @@
         container.innerHTML += folderHTML;
     }
 
+    // --- FITUR BARU FIX MUTLAK: MEMBUAT GRID MEDIA BERSIH TANPA DETAIL DRAF CATATAN ---
+    function buildCleanMediaFolderHTML(tabType, folderName, items, mediaType) {
+        let container = document.getElementById('container-' + tabType);
+        let folderId = `folder-${tabType}-${md5(folderName)}`;
+
+        let folderHTML = `
+            <div class="grup-wrapper" id="${folderId}" data-foldername="${folderName}" data-tabtype="${tabType}">
+                <div class="grup-header">
+                    <div class="drag-folder-handle">
+                        <span class="editable-folder-title" id="target-folder-${tabType}-${md5(folderName)}" ondblclick="eksekusiEditFolderMassal('${folderName}', '${tabType}')">📁 Folder Gambar: <span>${folderName}</span></span>
+                    </div>
+                    <div class="grup-actions">
+                        <button class="btn-delete-folder" onclick="simulasikanHapusFolderMassal('${folderName}')">🗑️ Hapus Folder</button>
+                        <button class="btn-toggle-grup" onclick="toggleGroupSection(event, this)">📂 Lihat Berkas</button>
+                    </div>
+                </div>
+                <div class="grup-body">
+                    <div class="note-gallery" style="justify-content: flex-start;">`;
+
+        items.forEach(note => {
+            // Render Foto Saja
+            if (mediaType === 'photos') {
+                note.photos.forEach(p => {
+                    folderHTML += `
+                        <div class="gallery-item" data-date="${note.created_at.substring(0,10)}" data-notetitle="${note.title}">
+                            <img src="${p.data}" class="note-img" onclick="window.open(this.src, '_blank')">
+                            <a href="${p.data}" download="${p.name}" class="btn-download-photo">📥 Download</a>
+                        </div>`;
+                });
+            }
+            // Render Video Saja
+            if (mediaType === 'videos') {
+                note.videos.forEach(v => {
+                    folderHTML += `
+                        <div class="video-item" data-date="${note.created_at.substring(0,10)}" data-notetitle="${note.title}">
+                            <video class="note-video" controls><source src="${v.data}"></video>
+                            <a href="${v.data}" download="${v.name}" class="btn-download-photo" style="background:#3182ce;">📥 Download Video</a>
+                        </div>`;
+                });
+            }
+            // Render Dokumen Saja
+            if (mediaType === 'docs') {
+                note.docs.forEach(d => {
+                    folderHTML += `
+                        <div class="doc-item" data-date="${note.created_at.substring(0,10)}" data-notetitle="${note.title}">
+                            <div class="doc-icon">📄</div>
+                            <div class="doc-name-text" title="${d.name}">${d.name}</div>
+                            <a href="${d.data}" download="${d.name}" class="btn-download-photo" style="background:#4a5568;">📥 Download</a>
+                        </div>`;
+                });
+            }
+        });
+
+        folderHTML += `</div></div></div>`;
+        container.innerHTML += folderHTML;
+    }
+
     function eksekusiEditJudulSaja(noteId, tabType) {
         let note = notes.find(n => n.id === noteId);
         if(!note) return;
@@ -598,7 +658,7 @@
                     input.replaceWith(h3);
                 }
 
-                let semuaTab = ['semua', 'tulisan', 'galeri', 'vid', 'dokumen'];
+                let semuaTab = ['semua', 'tulisan'];
                 semuaTab.forEach(t => {
                     if(t !== tabType) {
                         let tJudul = document.getElementById(`target-judul-${t}-${noteId}`);
@@ -628,18 +688,11 @@
 
             let saveFolderMassal = function() {
                 let newFolderName = input.value.trim() || 'Umum / Tanpa Grup';
-                
                 if (newFolderName !== oldFolderName) {
-                    notes.forEach(note => {
-                        if (note.folder === oldFolderName) {
-                            note.folder = newFolderName;
-                        }
-                    });
+                    notes.forEach(note => { if (note.folder === oldFolderName) { note.folder = newFolderName; } });
                     localStorage.setItem('html_notes_db', JSON.stringify(notes));
-                    renderAllData();
-                } else {
-                    renderAllData();
                 }
+                renderAllData();
             };
 
             input.addEventListener('keydown', (e) => { if (e.key === 'Enter') saveFolderMassal(); });
@@ -676,7 +729,7 @@
                 
                 textarea.replaceWith(p);
 
-                let semuaTab = ['semua', 'tulisan', 'galeri', 'vid', 'dokumen'];
+                let semuaTab = ['semua', 'tulisan'];
                 semuaTab.forEach(tab => {
                     if(tab !== tabType) {
                         let targetLain = document.getElementById(`target-draf-isi-${tab}-${noteId}`);
@@ -687,7 +740,6 @@
         }
     }
 
-    // PROSES UTAMA FIX: Form pengisian baru berjalan lancar dan otomatis memperbarui list tanpa eror lagi
     function simulasikanSimpanCatatan(e) {
         e.preventDefault();
         let title = document.getElementById("noteTitleInput").value || 'Catatan Tanpa Judul';
@@ -751,15 +803,16 @@
 
         if (!activeTabContent) return;
 
+        // Modifikasi filter agar menargetkan note-card & item galeri media secara fleksibel
         const folderWrappers = activeTabContent.querySelectorAll('.grup-wrapper');
         folderWrappers.forEach(wrapper => {
             const folderName = wrapper.getAttribute('data-foldername');
-            const innerCards = wrapper.querySelectorAll('.note-card');
+            const innerItems = wrapper.querySelectorAll('.note-card, .gallery-item, .video-item, .doc-item');
             let visibleCardsCount = 0;
             
-            innerCards.forEach(card => {
+            innerItems.forEach(card => {
                 const cardDate = card.getAttribute('data-date');
-                const cardTitle = card.getAttribute('data-notetitle').toLowerCase();
+                const cardTitle = card.getAttribute('data-notetitle') ? card.getAttribute('data-notetitle').toLowerCase() : '';
                 
                 const matchesDate = (selectedDate === "" || cardDate === selectedDate);
                 const matchesSearch = (searchText === "" || cardTitle.includes(searchText) || folderName.toLowerCase().includes(searchText));
