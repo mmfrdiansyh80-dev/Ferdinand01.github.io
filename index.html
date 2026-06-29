@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Notepad Premium - Full Inline Edit</title>
+    <title>Smart Notepad Premium - Full Fixed Version</title>
     <style>
         :root {
             --bg-body: #f4f6f9;
@@ -497,7 +497,6 @@
             <div class="grup-wrapper" id="${folderId}" data-foldername="${folderName}" data-tabtype="${tabType}">
                 <div class="grup-header">
                     <div class="drag-folder-handle">
-                        <!-- FITUR BARU: Double Click untuk ganti Nama Folder Lokal langsung -->
                         <span class="editable-folder-title" id="target-folder-${tabType}-${md5(folderName)}" ondblclick="eksekusiEditFolderMassal('${folderName}', '${tabType}')">📁 Folder: <span>${folderName}</span> (${items.length})</span>
                     </div>
                     <div class="grup-actions">
@@ -509,11 +508,11 @@
                     <div class="note-grid" data-zone="file">`;
 
         items.forEach(note => {
+            // FIX VARIABEL UTAMA: Mengubah target-draf-isi agar akurat mengikat variable note.id bawaan objek perulangan
             folderHTML += `
                 <div class="note-card" id="card-${tabType}-${note.id}" data-noteid="${note.id}" data-notetitle="${note.title}" data-date="${note.created_at.substring(0,10)}">
                     <div class="note-header-block">
                         <div class="drag-file-title-handle">
-                            <!-- FITUR BARU: Double Click untuk ganti Judul Catatan Lokal langsung -->
                             <h3 class="editable-note-title" id="target-judul-${tabType}-${note.id}" ondblclick="eksekusiEditJudulSaja('${note.id}', '${tabType}')"><span>${note.title}</span></h3>
                             <div class="meta-info">📅 ${note.created_at}</div>
                         </div>
@@ -521,7 +520,7 @@
                     </div>
                     <div class="note-body-content">
                         <div id="wrapper-isi-${tabType}-${note.id}">
-                            <p class="note-body-text" id="target-draf-isi-${tabType}-${noteId}" style="white-space: pre-line; line-height: 1.5; color: var(--text-main); font-size:14px;" ondblclick="eksekusiEditIsiSaja('${note.id}', '${tabType}')">${note.content}</p>
+                            <p class="note-body-text" id="target-draf-isi-${tabType}-${note.id}" style="white-space: pre-line; line-height: 1.5; color: var(--text-main); font-size:14px;" ondblclick="eksekusiEditIsiSaja('${note.id}', '${tabType}')">${note.content}</p>
                         </div>
                         
                         ${note.link ? `<a href="${note.link}" target="_blank" class="note-link">🔗 Kunjungi Website</a>` : ''}
@@ -560,7 +559,6 @@
         container.innerHTML += folderHTML;
     }
 
-    // --- FITUR BARU: INLINE EDIT JUDUL CATATAN (DOUBLE CLICK) ---
     function eksekusiEditJudulSaja(noteId, tabType) {
         let note = notes.find(n => n.id === noteId);
         if(!note) return;
@@ -584,7 +582,6 @@
                 note.title = updatedTitle;
                 localStorage.setItem('html_notes_db', JSON.stringify(notes));
 
-                // Ganti balik ke element h3/span bawaan secara lokal instan
                 if(tabType === 'tautan') {
                     let strongSpan = document.createElement('span');
                     strongSpan.className = 'editable-note-title';
@@ -601,7 +598,6 @@
                     input.replaceWith(h3);
                 }
 
-                // Sinkronisasi teks judul ke tab lainnya di latar belakang
                 let semuaTab = ['semua', 'tulisan', 'galeri', 'vid', 'dokumen'];
                 semuaTab.forEach(t => {
                     if(t !== tabType) {
@@ -618,7 +614,6 @@
         }
     }
 
-    // --- FITUR BARU: INLINE EDIT NAMA FOLDER MASSAL (DOUBLE CLICK) ---
     function eksekusiEditFolderMassal(oldFolderName, tabType) {
         let folderElement = document.getElementById(`target-folder-${tabType}-${md5(oldFolderName)}`);
         
@@ -635,15 +630,12 @@
                 let newFolderName = input.value.trim() || 'Umum / Tanpa Grup';
                 
                 if (newFolderName !== oldFolderName) {
-                    // Update database lokal untuk semua note yang memiliki nama folder ini
                     notes.forEach(note => {
                         if (note.folder === oldFolderName) {
                             note.folder = newFolderName;
                         }
                     });
                     localStorage.setItem('html_notes_db', JSON.stringify(notes));
-                    
-                    // Supaya aman dan id folder teregenerasi dengan MD5 yang baru, render ulang datanya secara instan
                     renderAllData();
                 } else {
                     renderAllData();
@@ -695,6 +687,7 @@
         }
     }
 
+    // PROSES UTAMA FIX: Form pengisian baru berjalan lancar dan otomatis memperbarui list tanpa eror lagi
     function simulasikanSimpanCatatan(e) {
         e.preventDefault();
         let title = document.getElementById("noteTitleInput").value || 'Catatan Tanpa Judul';
