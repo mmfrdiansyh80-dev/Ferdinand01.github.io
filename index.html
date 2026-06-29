@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Notepad Premium - HTML Version</title>
+    <title>Smart Notepad Premium - Multi View Mode</title>
     <style>
         :root {
             --bg-body: #f4f6f9;
@@ -25,180 +25,200 @@
             --text-folder: #63b3ed;
         }
 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-body); margin: 0; padding: 20px; color: var(--text-main); transition: background 0.3s, color 0.3s; }
-        .container { max-width: 900px; margin: 0 auto; position: relative; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg-body); 
+            margin: 0; 
+            padding: 20px; 
+            color: var(--text-main); 
+            transition: background 0.3s, color 0.3s; 
+        }
+
+        /* --- FITUR SWITCHER VIEW MODE (HP / LAPTOP / OTOMATIS) --- */
+        body.mode-phone {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background: #0f172a; /* Latar belakang luar emulator */
+        }
+        body.mode-phone .container {
+            width: 100% !important;
+            max-width: 390px !important; /* Standar Lebar Layar HP */
+            background: var(--bg-body);
+            min-height: calc(100vh - 40px);
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 6px solid #334155;
+            overflow-x: hidden;
+        }
+        body.mode-laptop .container {
+            width: 1200px !important;
+            max-width: none !important;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; position: relative; width: 100%; transition: all 0.3s ease; }
         
         .app-header-grid { 
             display: grid; 
-            grid-template-columns: 1fr auto 1fr; 
+            grid-template-columns: 1fr; 
+            gap: 10px;
             align-items: center; 
             margin-bottom: 5px; 
             padding-bottom: 10px;
             width: 100%;
         }
+        @media (min-width: 768px) {
+            .app-header-grid { grid-template-columns: 1fr auto 1fr; }
+        }
         
         .app-watermark { 
-            font-size: 14px; 
+            font-size: 13px; 
             font-weight: 500; 
             color: var(--text-sub); 
             opacity: 0.9; 
             user-select: none;
-            text-align: left;
+            text-align: center;
         }
+        @media (min-width: 768px) { .app-watermark { text-align: left; } }
         
         h1 { 
             margin: 0; 
             color: var(--text-main); 
-            font-size: 30px; 
+            font-size: 24px; 
             display: flex; 
             align-items: center; 
             justify-content: center;
             gap: 10px; 
-            white-space: nowrap;
+            text-align: center;
         }
+        @media (min-width: 768px) { h1 { font-size: 30px; } }
         
         .header-nav-right { 
             display: flex; 
-            gap: 10px; 
+            gap: 8px; 
             align-items: center; 
-            justify-content: flex-end;
+            justify-content: center;
+            flex-wrap: wrap;
         }
+        @media (min-width: 768px) { .header-nav-right { justify-content: flex-end; } }
 
-        .sub-title { text-align: center; color: var(--text-sub); margin-bottom: 30px; font-size: 14px; }
-        .notepad-form, .note-card { background: var(--bg-card); padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid var(--border-color); }
-        .notepad-form h3 { margin-top: 0; color: var(--text-main); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+        .sub-title { text-align: center; color: var(--text-sub); margin-bottom: 20px; font-size: 13px; }
+        .notepad-form, .note-card { background: var(--bg-card); padding: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid var(--border-color); }
+        @media (min-width: 768px) { .notepad-form, .note-card { padding: 25px; } }
+
+        .notepad-form h3 { margin-top: 0; color: var(--text-main); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; font-size: 18px; }
         
-        input[type="text"], textarea, select, input[type="date"] { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main); border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-        textarea { height: 140px; resize: vertical; }
-        .folder-flex { display: flex; gap: 15px; width: 100%; }
-        .btn-submit { background: #3182ce; color: #fff; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer; font-size: 15px; font-weight: bold; }
+        input[type="text"], textarea, select, input[type="date"] { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main); border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        textarea { height: 120px; resize: vertical; }
+        
+        .folder-flex { display: flex; flex-direction: column; gap: 0; width: 100%; }
+        @media (min-width: 768px) { .folder-flex { flex-direction: row; gap: 15px; } }
+
+        .btn-submit { background: #3182ce; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; width: 100%; }
+        @media (min-width: 768px) { .btn-submit { width: auto; } }
         .btn-submit:hover { background: #2b6cb0; }
-        .btn-logout { background: #e53e3e; color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px; border: none; cursor: pointer; }
-        .btn-logout:hover { background: #c53030; }
-        .btn-theme-toggle { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-
-        .filter-panel { background: var(--bg-card); padding: 15px 20px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; box-shadow: 0 2px 4px rgba(0,0,0,0.02); position: relative; }
-        .filter-group { display: flex; align-items: center; gap: 8px; position: relative; }
-        .filter-group label { font-size: 13px; font-weight: bold; color: var(--text-sub); white-space: nowrap; }
-        .filter-group select, .filter-group input[type="date"], .filter-group input[type="text"] { padding: 8px 12px; margin: 0; width: auto; font-size: 13px; }
         
-        .filter-group input[type="text"].search-box-input { width: 240px; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); }
+        .btn-logout { background: #e53e3e; color: #fff; text-decoration: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; font-size: 12px; border: none; cursor: pointer; }
+        .btn-logout:hover { background: #c53030; }
+        .btn-theme-toggle, .btn-view-toggle { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+        .filter-panel { background: var(--bg-card); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        @media (min-width: 768px) { .filter-panel { flex-direction: row; align-items: center; flex-wrap: wrap; } }
+
+        .filter-group { display: flex; flex-direction: column; gap: 4px; width: 100%; position: relative; }
+        @media (min-width: 768px) { .filter-group { flex-direction: row; align-items: center; gap: 8px; width: auto; } }
+        .filter-group label { font-size: 12px; font-weight: bold; color: var(--text-sub); white-space: nowrap; }
+        .filter-group select, .filter-group input[type="date"], .filter-group input[type="text"] { margin: 0; width: 100%; font-size: 13px; }
+        @media (min-width: 768px) { .filter-group select, .filter-group input[type="date"], .filter-group input[type="text"] { width: auto; } }
+        
+        .filter-group input[type="text"].search-box-input { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); }
+        @media (min-width: 768px) { .filter-group input[type="text"].search-box-input { width: 200px; } }
         
         .search-suggestions-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 110px; 
-            width: 280px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-top: none;
-            border-radius: 0 0 6px 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.18);
-            z-index: 999;
-            max-height: 250px;
-            overflow-y: auto;
-            display: none;
-            padding: 0;
-            margin: 0;
-            list-style: none;
+            position: absolute; top: 100%; left: 0; width: 100%; background: var(--bg-card); border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 6px 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.18); z-index: 999; max-height: 200px; overflow-y: auto; display: none; padding: 0; margin: 0; list-style: none;
         }
-        .search-suggestions-dropdown li {
-            padding: 10px 12px;
-            font-size: 13px;
-            cursor: pointer;
-            color: var(--text-main);
-            border-bottom: 1px solid var(--border-color);
-            transition: background 0.15s;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .search-suggestions-dropdown li:last-child { border-bottom: none; }
-        .search-suggestions-dropdown li:hover { background: #3182ce; color: #ffffff; }
 
-        .btn-reset-filter { background: var(--border-color); border: none; color: var(--text-main); padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .btn-reset-filter { background: var(--border-color); border: none; color: var(--text-main); padding: 10px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; width: 100%; }
+        @media (min-width: 768px) { .btn-reset-filter { width: auto; padding: 8px 14px; } }
 
-        .preview-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
-        .preview-container img, .preview-container video, .preview-box { width: 100px; height: 100px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); padding: 3px; background: var(--bg-card); font-size: 10px; display: flex; justify-content: center; align-items: center; text-align: center; word-break: break-all; color: var(--text-main); font-weight: bold; }
+        .preview-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .preview-container img, .preview-container video, .preview-box { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); padding: 2px; background: var(--bg-card); font-size: 9px; display: flex; justify-content: center; align-items: center; text-align: center; word-break: break-all; }
         
-        .tabs-container { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; flex-wrap: wrap; }
-        .tab-btn { background: var(--border-color); border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; color: var(--text-sub); }
+        .tabs-container { display: flex; gap: 6px; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+        .tabs-container::-webkit-scrollbar { height: 4px; }
+        .tabs-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+        .tab-btn { background: var(--border-color); border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; color: var(--text-sub); flex-shrink: 0; }
         .tab-btn.active { background: #3182ce; color: #fff; }
+        
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        .grup-wrapper { background: var(--bg-wrapper); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--border-color); transition: transform 0.15s; }
-        .grup-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 16px; color: var(--text-folder); padding: 5px 0; }
+        .grup-wrapper { background: var(--bg-wrapper); padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px solid var(--border-color); }
+        .grup-header { display: flex; flex-direction: column; gap: 8px; font-weight: bold; font-size: 14px; color: var(--text-folder); padding: 5px 0; }
+        @media (min-width: 480px) { .grup-header { flex-direction: row; justify-content: space-between; align-items: center; font-size: 15px; } }
         
-        .drag-folder-handle { cursor: grab; padding: 5px; display: inline-flex; align-items: center; }
-        .drag-folder-handle:active { cursor: grabbing; }
+        .drag-folder-handle { display: flex; align-items: center; }
+        .grup-actions { display: flex; gap: 6px; justify-content: space-between; }
 
-        .editable-folder-title, .editable-note-title { cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.1s; border: 1px solid transparent; display: inline-block; color: var(--text-folder); }
-        .editable-folder-title:hover, .editable-note-title:hover { background: var(--border-color); border: 1px dashed var(--text-sub); }
-
-        .grup-actions { display: flex; gap: 8px; align-items: center; }
-        .grup-body { display: none; margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.02); border-radius: 8px; }
-        [data-theme="dark"] .grup-body { background: rgba(255,255,255,0.02); }
+        .grup-body { display: none; margin-top: 10px; padding: 5px; background: rgba(0,0,0,0.01); border-radius: 8px; }
         .grup-body.is-open { display: block !important; }
 
-        .note-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        .note-card, .album-section { background: var(--bg-card); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .note-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         
-        .drag-file-title-handle { cursor: default; display: block; flex-grow: 1; user-select: none; }
-        .editable-note-title, .album-title { cursor: grab !important; }
-        .editable-note-title:active, .album-title:active { cursor: grabbing !important; }
-
-        .dragging-item { opacity: 0.4; border: 2px dashed #3182ce !important; background: #ebf8ff !important; }
-
-        .note-header-block { display: flex; justify-content: space-between; align-items: center; user-select: none; }
-        .meta-info { font-size: 12px; color: var(--text-sub); margin-top: 5px; padding-left: 8px; }
+        .note-header-block { display: flex; flex-direction: column; gap: 8px; }
+        @media (min-width: 480px) { .note-header-block { flex-direction: row; justify-content: space-between; align-items: center; } }
         
-        .note-body-content { display: none; margin-top: 20px; padding-top: 15px; border-top: 1px dashed var(--border-color); }
+        .drag-file-title-handle h3 { margin: 0; font-size: 16px; }
+        .meta-info { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+        
+        .note-body-content { display: none; margin-top: 15px; padding-top: 12px; border-top: 1px dashed var(--border-color); }
         .note-body-content.is-open { display: block !important; }
-        
-        .album-header { display: flex; justify-content: space-between; align-items: center; }
-        .album-content { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border-color); }
-        .album-content.is-open { display: block !important; }
 
-        .btn-toggle-note, .btn-toggle-grup, .btn-toggle-album { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); padding: 6px 14px; border-radius: 5px; font-size: 12px; font-weight: bold; cursor: pointer; position: relative; }
-        .btn-delete-folder { background: #f56565; color: #fff; border: none; padding: 6px 12px; border-radius: 5px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .btn-toggle-note, .btn-toggle-grup { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 5px; font-size: 11px; font-weight: bold; cursor: pointer; width: 100%; text-align: center; }
+        @media (min-width: 480px) { .btn-toggle-note, .btn-toggle-grup { width: auto; } }
+        .btn-delete-folder { background: #f56565; color: #fff; border: none; padding: 6px 10px; border-radius: 5px; font-size: 11px; font-weight: bold; cursor: pointer; width: 100%; }
+        @media (min-width: 480px) { .btn-delete-folder { width: auto; } }
 
-        .note-link { display: inline-block; margin-top: 15px; color: #3182ce; text-decoration: none; font-weight: bold; background: #ebf8ff; padding: 8px 15px; border-radius: 5px; }
-        [data-theme="dark"] .note-link { background: #1e3a8a; color: #63b3ed; }
-        .note-gallery { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; }
+        .note-link { display: inline-block; margin-top: 10px; color: #3182ce; text-decoration: none; font-weight: bold; background: #ebf8ff; padding: 6px 12px; border-radius: 5px; font-size: 13px; word-break: break-all; }
         
-        .gallery-item { display: flex; flex-direction: column; align-items: center; background: var(--bg-body); padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); width: 170px; }
-        .note-img { width: 100%; height: 120px; object-fit: cover; border-radius: 6px; transition: transform 0.2s; }
-        .note-img:hover { transform: scale(1.04); cursor: pointer; }
+        .note-gallery { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+        .gallery-item { background: var(--bg-body); padding: 6px; border-radius: 8px; border: 1px solid var(--border-color); width: calc(50% - 5px); box-sizing: border-box; }
+        @media (min-width: 480px) { .gallery-item { width: 140px; } }
         
-        .video-item { display: flex; flex-direction: column; align-items: center; background: var(--bg-body); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); width: 240px; }
-        .note-video { width: 100%; height: 140px; border-radius: 6px; background: #000; outline: none; }
+        .note-img { width: 100%; height: 90px; object-fit: cover; border-radius: 6px; }
         
-        .doc-item { display: flex; flex-direction: column; align-items: center; background: var(--bg-card); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); width: 180px; text-align: center; }
-        .doc-icon { font-size: 40px; margin-bottom: 5px; }
-        .doc-name-text { font-size: 12px; color: var(--text-main); font-weight: bold; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 8px; }
+        .video-item { background: var(--bg-body); padding: 6px; border-radius: 8px; border: 1px solid var(--border-color); width: 100%; box-sizing: border-box; }
+        @media (min-width: 480px) { .video-item { width: 200px; } }
+        .note-video { width: 100%; height: 120px; border-radius: 6px; background: #000; }
+        
+        .doc-item { background: var(--bg-card); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); width: 100%; text-align: center; box-sizing: border-box; }
+        @media (min-width: 480px) { .doc-item { width: 140px; } }
+        .doc-icon { font-size: 30px; }
+        .doc-name-text { font-size: 11px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 5px; }
 
-        .link-table { width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .link-table th, .link-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
-        .link-table th { background: var(--bg-wrapper); color: var(--text-main); font-size: 14px; }
-        
-        .link-table code { cursor: pointer; padding: 4px 8px; background: rgba(229, 62, 62, 0.1); border-radius: 4px; transition: background 0.2s; }
-        .link-table code:hover { background: rgba(229, 62, 62, 0.2); }
+        /* Pembungkus Tabel Responsif agar di HP tidak merusak layout */
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid var(--border-color); }
+        .link-table { width: 100%; border-collapse: collapse; background: var(--bg-card); min-width: 500px; }
+        .link-table th, .link-table td { padding: 10px; font-size: 13px; text-align: left; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
+        .link-table th { background: var(--bg-wrapper); }
+        .link-table code { display: inline-block; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
 
-        .action-bar { margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color); display: flex; gap: 10px; }
-        .btn-edit { background: #ecc94b; color: #fff; border: none; padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: bold; text-decoration: none; cursor: pointer; }
-        .btn-delete { background: #f56565; color: #fff; border: none; padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: bold; text-decoration: none; cursor: pointer; }
-        .btn-download-photo { display: block; width: 100%; box-sizing: border-box; text-align: center; background: #3182ce; color: #fff; text-decoration: none; font-size: 11px; padding: 5px; margin-top: 5px; border-radius: 4px; font-weight: bold; }
-        .inline-edit-input { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); padding: 4px; font-size: 14px; border-radius: 4px; }
+        .action-bar { margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border-color); display: flex; gap: 8px; }
+        .btn-edit { background: #ecc94b; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .btn-delete { background: #f56565; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .btn-download-photo { display: block; width: 100%; box-sizing: border-box; text-align: center; background: #3182ce; color: #fff; text-decoration: none; font-size: 10px; padding: 4px; margin-top: 4px; border-radius: 4px; font-weight: bold; }
     </style>
 </head>
-<body>
+<body class="mode-auto">
 
 <div class="container">
     <div class="app-header-grid">
         <div class="app-watermark">Dibuat oleh _eymefrd26_</div>
         <h1>📝 Notepad Super Premium</h1>
         <div class="header-nav-right">
+            <!-- TOMBOL BARU SWITCHING MODE TAMPILAN -->
+            <button class="btn-view-toggle" id="viewToggleBtn" onclick="toggleViewMode()">📱 Mode: Otomatis</button>
             <button class="btn-theme-toggle" id="themeToggleBtn" onclick="toggleThemeSystem()">☀️ Light Mode</button>
             <button class="btn-logout" onclick="simulasikanLogout()">🚪 Sign Out</button>
         </div>
@@ -213,28 +233,28 @@
             <input type="hidden" id="noteId" value="">
             <input type="text" id="noteTitleInput" placeholder="Judul Catatan (Bisa dikosongkan)">
             <div class="folder-flex">
-                <input type="text" id="newFolderInput" placeholder="📁 Buat Nama Folder / Grup Baru (Misal: Kuliah, Kerja)">
+                <input type="text" id="newFolderInput" placeholder="📁 Buat Nama Folder Baru (Misal: Kuliah, Kerja)">
                 <select id="selectFolderInput">
-                    <option value="">-- Atau Pilih Folder yg Sudah Ada --</option>
+                    <option value="">-- Atau Pilih Folder yg Ada --</option>
                     <option value="Umum / Tanpa Grup">Umum / Tanpa Grup</option>
                 </select>
             </div>
             <textarea id="noteContentInput" placeholder="Tulis draf teks atau catatanmu secara leluasa di sini..."></textarea>
             <input type="text" id="noteLinkInput" placeholder="Tautan Link Website (Contoh: https://google.com)">
             
-            <label style="font-weight: bold; font-size: 14px; display:block; margin-top:10px;">Tambah Foto Berjumlah Banyak:</label>
-            <input type="file" id="photoInput" accept="image/*" multiple style="margin: 5px 0;">
+            <label style="font-weight: bold; font-size: 13px; display:block; margin-top:10px;">Tambah Foto Berjumlah Banyak:</label>
+            <input type="file" id="photoInput" accept="image/*" multiple style="margin: 5px 0; font-size: 12px;">
             
-            <label style="font-weight: bold; font-size: 14px; display:block; margin-top:10px;">Tambah Video Berjumlah Banyak:</label>
-            <input type="file" id="videoInput" accept="video/*" multiple style="margin: 5px 0;">
+            <label style="font-weight: bold; font-size: 13px; display:block; margin-top:10px;">Tambah Video Berjumlah Banyak:</label>
+            <input type="file" id="videoInput" accept="video/*" multiple style="margin: 5px 0; font-size: 12px;">
 
-            <label style="font-weight: bold; font-size: 14px; display:block; margin-top:10px;">Tambah Dokumen Berjumlah Banyak (.pdf, .docx, .xlsx, .zip, .psd, .ai):</label>
-            <input type="file" id="docInput" multiple style="margin: 5px 0;">
+            <label style="font-weight: bold; font-size: 13px; display:block; margin-top:10px;">Tambah Dokumen Berjumlah Banyak:</label>
+            <input type="file" id="docInput" multiple style="margin: 5px 0; font-size: 12px;">
             
             <div class="preview-container" id="previewContainer"></div>
-            <div style="margin-top: 20px;">
+            <div style="margin-top: 15px;">
                 <button type="submit" class="btn-submit" id="btnSubmitForm">Simpan Catatan</button>
-                <button type="button" class="btn-reset-filter" id="btnCancelEdit" style="display:none;" onclick="cancelEditMode()">Batal</button>
+                <button type="button" class="btn-reset-filter" id="btnCancelEdit" style="display:none; margin-top: 5px;" onclick="cancelEditMode()">Batal</button>
             </div>
         </form>
     </div>
@@ -243,15 +263,15 @@
     <div class="filter-panel">
         <div class="filter-group">
             <label>🔍 Pencarian Cepat:</label>
-            <input type="text" id="searchQuery" class="search-box-input" placeholder="Ketik nama folder atau judul..." onkeyup="applyFiltersAndSorting()" autocomplete="off">
+            <input type="text" id="searchQuery" class="search-box-input" placeholder="Cari folder atau judul..." onkeyup="applyFiltersAndSorting()" autocomplete="off">
             <ul id="searchSuggestions" class="search-suggestions-dropdown"></ul>
         </div>
         <div class="filter-group">
-            <label>📅 Cari Per-Tanggal:</label>
+            <label>📅 Per-Tanggal:</label>
             <input type="date" id="filterDate" onchange="applyFiltersAndSorting()">
         </div>
         <div class="filter-group">
-            <label>🔠 Urutan Abjad Folder:</label>
+            <label>🔠 Urutan Abjad:</label>
             <select id="sortOrder" onchange="applyFiltersAndSorting()">
                 <option value="default">-- Pilih Urutan --</option>
                 <option value="az">Nama Folder: A ke Z ⬇️</option>
@@ -299,19 +319,21 @@
 
     <div id="tautan" class="tab-content">
         <h2>🔗 Pusat Pencarian Link Cepat</h2>
-        <table class="link-table">
-            <thead><tr><th>Folder / Grup</th><th>Judul Catatan</th><th>Tautan Website</th><th>Aksi</th></tr></thead>
-            <tbody id="linkTableBody" class="sortable-container" data-zone="file"></tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="link-table">
+                <thead><tr><th>Folder / Grup</th><th>Judul Catatan</th><th>Tautan Website</th><th>Aksi</th></tr></thead>
+                <tbody id="linkTableBody" class="sortable-container" data-zone="file"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <!-- JAVASCRIPT SYSTEM APPS -->
 <script>
-    // Menyimpan data notes yang diunggah ke memori Lokal browser
     let notes = JSON.parse(localStorage.getItem('html_notes_db')) || [];
+    let viewModes = ['auto', 'phone', 'laptop'];
+    let currentViewIndex = 0;
 
-    // Array sementara untuk file Base64 sebelum form disubmit
     let tempPhotos = [];
     let tempVideos = [];
     let tempDocs = [];
@@ -324,15 +346,40 @@
         document.documentElement.setAttribute("data-theme", savedTheme);
         document.getElementById("themeToggleBtn").innerText = savedTheme === "dark" ? "🌙 Dark Mode" : "☀️ Light Mode";
 
+        // Memulihkan mode tampilan terakhir dari memory
+        const savedViewMode = localStorage.getItem("notepad_view_mode") || "auto";
+        currentViewIndex = viewModes.indexOf(savedViewMode);
+        applyViewModeStyles(savedViewMode);
+
         renderAllData();
         setupFileInputListeners();
-
-        document.addEventListener("click", function(e) {
-            if (!e.target.closest('#searchQuery') && !e.target.closest('#searchSuggestions')) {
-                document.getElementById('searchSuggestions').style.display = "none";
-            }
-        });
     });
+
+    // --- FITUR BARU: TOGGLE SCREEN VIEW MODE ---
+    function toggleViewMode() {
+        currentViewIndex = (currentViewIndex + 1) % viewModes.length;
+        let selectedMode = viewModes[currentViewIndex];
+        localStorage.setItem("notepad_view_mode", selectedMode);
+        applyViewModeStyles(selectedMode);
+    }
+
+    function applyViewModeStyles(mode) {
+        const body = document.body;
+        const btn = document.getElementById("viewToggleBtn");
+        
+        body.classList.remove('mode-auto', 'mode-phone', 'mode-laptop');
+        
+        if (mode === 'auto') {
+            body.classList.add('mode-auto');
+            btn.innerText = "📱 Mode: Otomatis";
+        } else if (mode === 'phone') {
+            body.classList.add('mode-phone');
+            btn.innerText = "📱 Mode: Layar HP";
+        } else if (mode === 'laptop') {
+            body.classList.add('mode-laptop');
+            btn.innerText = "💻 Mode: Laptop";
+        }
+    }
 
     function toggleThemeSystem() {
         const currentTheme = document.documentElement.getAttribute("data-theme");
@@ -354,7 +401,6 @@
         applyFiltersAndSorting();
     }
 
-    // Mengonversi Input File ke Base64 Data String agar tersimpan di HTML
     function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -396,41 +442,21 @@
     function renderPreviews() {
         const previewContainer = document.getElementById('previewContainer');
         previewContainer.innerHTML = ""; 
-        
-        tempPhotos.forEach(p => {
-            const img = document.createElement('img');
-            img.src = p.data;
-            previewContainer.appendChild(img);
-        });
-        
-        tempVideos.forEach(v => {
-            const vid = document.createElement('video');
-            vid.src = v.data;
-            previewContainer.appendChild(vid);
-        });
-        
-        tempDocs.forEach(d => {
-            const box = document.createElement('div');
-            box.className = 'preview-box';
-            box.innerText = "📄\n" + d.name;
-            previewContainer.appendChild(box);
-        });
+        tempPhotos.forEach(p => { previewContainer.innerHTML += `<img src="${p.data}">`; });
+        tempVideos.forEach(v => { previewContainer.innerHTML += `<video src="${v.data}"></video>`; });
+        tempDocs.forEach(d => { previewContainer.innerHTML += `<div class="preview-box">📄<br>${d.name}</div>`; });
     }
 
     function renderAllData() {
-        // Dropdown folder manager
         const selectFolder = document.getElementById("selectFolderInput");
-        selectFolder.innerHTML = '<option value="">-- Atau Pilih Folder yg Sudah Ada --</option>';
+        selectFolder.innerHTML = '<option value="">-- Atau Pilih Folder yg Ada --</option>';
         const uniqueFolders = [...new Set(notes.map(n => n.folder || 'Umum / Tanpa Grup'))];
-        uniqueFolders.forEach(f => {
-            selectFolder.innerHTML += `<option value="${f}">${f}</option>`;
-        });
+        uniqueFolders.forEach(f => { selectFolder.innerHTML += `<option value="${f}">${f}</option>`; });
 
         const tabs = ['semua', 'tulisan', 'galeri', 'vid', 'dokumen'];
         tabs.forEach(t => document.getElementById('container-' + t).innerHTML = '');
         document.getElementById('linkTableBody').innerHTML = '';
 
-        // Pengelompokan Data
         let groups = {};
         notes.forEach(note => {
             let f = note.folder || 'Umum / Tanpa Grup';
@@ -440,28 +466,21 @@
 
         for (let folderName in groups) {
             let items = groups[folderName];
-
-            // 1. Tab Semua
             buildFolderHTML('semua', folderName, items);
             
-            // 2. Tab Tulisan
             let textOnly = items.filter(n => !n.photos.length && !n.videos.length && !n.docs.length && !n.link);
             if(textOnly.length) buildFolderHTML('tulisan', folderName, textOnly);
 
-            // 3. Tab Galeri
             let hasPhotos = items.filter(n => n.photos.length);
             if(hasPhotos.length) buildFolderHTML('galeri', folderName, hasPhotos, 'photos');
 
-            // 4. Tab Video
             let hasVideos = items.filter(n => n.videos.length);
             if(hasVideos.length) buildFolderHTML('vid', folderName, hasVideos, 'videos');
 
-            // 5. Tab Dokumen
             let hasDocs = items.filter(n => n.docs.length);
             if(hasDocs.length) buildFolderHTML('dokumen', folderName, hasDocs, 'docs');
         }
 
-        // 6. Tab Tautan (Termasuk di daftar riwayat bila ada linknya)
         let hasLinks = false;
         notes.forEach(note => {
             if(note.link) {
@@ -470,8 +489,8 @@
                     <tr data-noteid="${note.id}" data-date="${note.created_at.substring(0,10)}" data-notetitle="${note.title}" data-foldername="${note.folder}">
                         <td>${note.folder}</td>
                         <td><strong>${note.title}</strong></td>
-                        <td><code onclick="copyUrlToClipboard(this)">${note.link}</code></td>
-                        <td><a href="${note.link}" target="_blank" style="background: #3182ce; color: #fff; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold;">🚀 Kunjungi</a></td>
+                        <td><code title="${note.link}">${note.link}</code></td>
+                        <td><a href="${note.link}" target="_blank" style="background: #3182ce; color: #fff; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: bold;">🚀 Buka</a></td>
                     </tr>`;
             }
         });
@@ -480,67 +499,59 @@
         }
     }
 
-    function buildFolderHTML(tabType, folderName, items, filterType = null) {
+    function buildFolderHTML(tabType, folderName, items) {
         let container = document.getElementById('container-' + tabType);
         let folderId = `folder-${tabType}-${md5(folderName)}`;
 
         let folderHTML = `
             <div class="grup-wrapper" id="${folderId}" data-foldername="${folderName}" data-tabtype="${tabType}">
                 <div class="grup-header">
-                    <div class="drag-folder-handle" draggable="true">
-                        <span class="editable-folder-title">📁 Folder: <span>${folderName}</span> (${items.length} Catatan)</span>
+                    <div class="drag-folder-handle">
+                        <span>📁 Folder: <span>${folderName}</span> (${items.length})</span>
                     </div>
                     <div class="grup-actions">
-                        <button class="btn-delete-folder" onclick="simulasikanHapusFolderMassal('${folderName}')">🗑️ Hapus Folder</button>
-                        <button class="btn-toggle-grup" onclick="toggleGroupSection(event, this)">📂 Buka Folder</button>
+                        <button class="btn-delete-folder" onclick="simulasikanHapusFolderMassal('${folderName}')">🗑️ Hapus</button>
+                        <button class="btn-toggle-grup" onclick="toggleGroupSection(event, this)">📂 Buka</button>
                     </div>
                 </div>
                 <div class="grup-body">
-                    <div class="note-grid sortable-container" data-zone="file">`;
+                    <div class="note-grid" data-zone="file">`;
 
         items.forEach(note => {
-            // Filter tampilan spesifik tab jika diinginkan
-            if(filterType === 'photos' && !note.photos.length) return;
-            if(filterType === 'videos' && !note.videos.length) return;
-            if(filterType === 'docs' && !note.docs.length) return;
-
             folderHTML += `
                 <div class="note-card" id="card-${tabType}-${note.id}" data-noteid="${note.id}" data-notetitle="${note.title}" data-date="${note.created_at.substring(0,10)}">
                     <div class="note-header-block">
-                        <div class="drag-file-title-handle" draggable="true" onclick="toggleNoteDetails(event, this)">
-                            <h3 class="editable-note-title"><span>${note.title}</span></h3>
-                            <div class="meta-info">Dibuat pada: ${note.created_at}</div>
+                        <div class="drag-file-title-handle" onclick="toggleNoteDetails(event, this)">
+                            <h3><span>${note.title}</span></h3>
+                            <div class="meta-info">📅 ${note.created_at}</div>
                         </div>
-                        <button class="btn-toggle-note" onclick="toggleNoteDetails(event, this)">🔽 Baca Selengkapnya</button>
+                        <button class="btn-toggle-note" onclick="toggleNoteDetails(event, this)" style="margin-top:5px;">🔽 Baca</button>
                     </div>
                     <div class="note-body-content">
-                        <p style="white-space: pre-line; line-height: 1.6; color: var(--text-main);">${note.content}</p>
+                        <p style="white-space: pre-line; line-height: 1.5; color: var(--text-main); font-size:14px;">${note.content}</p>
                         
-                        ${note.link ? `<a href="${note.link}" target="_blank" class="note-link">🔗 Link Tautan Website</a>` : ''}
+                        ${note.link ? `<a href="${note.link}" target="_blank" class="note-link">🔗 Kunjungi Website</a>` : ''}
 
                         <div class="note-gallery">
-                            <!-- Render Foto -->
                             ${note.photos.map(p => `
                                 <div class="gallery-item">
                                     <img src="${p.data}" class="note-img" onclick="window.open(this.src, '_blank')">
-                                    <a href="${p.data}" download="${p.name}" class="btn-download-photo">📥 Download</a>
+                                    <a href="${p.data}" download="${p.name}" class="btn-download-photo">📥 Simpan</a>
                                 </div>
                             `).join('')}
 
-                            <!-- Render Video -->
                             ${note.videos.map(v => `
                                 <div class="video-item">
                                     <video class="note-video" controls><source src="${v.data}"></video>
-                                    <a href="${v.data}" download="${v.name}" class="btn-download-photo" style="background:#3182ce;">📥 Download Video</a>
+                                    <a href="${v.data}" download="${v.name}" class="btn-download-photo" style="background:#3182ce;">📥 Simpan Vid</a>
                                 </div>
                             `).join('')}
 
-                            <!-- Render Dokumen -->
                             ${note.docs.map(d => `
                                 <div class="doc-item">
                                     <div class="doc-icon">📄</div>
                                     <div class="doc-name-text" title="${d.name}">${d.name}</div>
-                                    <a href="${d.data}" download="${d.name}" class="btn-download-photo" style="background:#4a5568;">📥 Download</a>
+                                    <a href="${d.data}" download="${d.name}" class="btn-download-photo" style="background:#4a5568;">📥 Unduh</a>
                                 </div>
                             `).join('')}
                         </div>
@@ -561,7 +572,7 @@
         e.preventDefault();
         let id = document.getElementById("noteId").value;
         let title = document.getElementById("noteTitleInput").value || 'Catatan Tanpa Judul';
-        let content = document.getElementById("noteContentInput").value || '(Tidak ada isi catatan)';
+        let content = document.getElementById("noteContentInput").value || '(Tidak ada isi)';
         let link = document.getElementById("noteLinkInput").value || '';
         let newFolder = document.getElementById("newFolderInput").value.trim();
         let selectFolder = document.getElementById("selectFolderInput").value;
@@ -570,40 +581,24 @@
         if(id) {
             let note = notes.find(n => n.id === id);
             if(note) {
-                note.title = title;
-                note.content = content;
-                note.link = link;
-                note.folder = folder;
-                // Jika user mengunggah file baru saat mengedit, gabungkan datanya
+                note.title = title; note.content = content; note.link = link; note.folder = folder;
                 if(tempPhotos.length) note.photos = [...note.photos, ...tempPhotos];
                 if(tempVideos.length) note.videos = [...note.videos, ...tempVideos];
                 if(tempDocs.length) note.docs = [...note.docs, ...tempDocs];
             }
         } else {
             let newNote = {
-                id: Date.now().toString(),
-                title: title,
-                content: content,
-                link: link,
-                folder: folder,
-                photos: tempPhotos,
-                videos: tempVideos,
-                docs: tempDocs,
+                id: Date.now().toString(), title: title, content: content, link: link, folder: folder,
+                photos: tempPhotos, videos: tempVideos, docs: tempDocs,
                 created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
             };
             notes.unshift(newNote);
         }
         
-        // Simpan ke LocalStorage permanen browser
         localStorage.setItem('html_notes_db', JSON.stringify(notes));
-        
-        // Reset state variabel penampung sementara
         tempPhotos = []; tempVideos = []; tempDocs = [];
-        document.getElementById("previewContainer").innerHTML = "";
-
         cancelEditMode();
         renderAllData();
-        document.getElementById("noteForm").reset();
     }
 
     function aktifkanModeEdit(id) {
@@ -614,10 +609,9 @@
             document.getElementById("noteContentInput").value = note.content;
             document.getElementById("noteLinkInput").value = note.link;
             document.getElementById("newFolderInput").value = note.folder;
-            
-            document.getElementById("formTitle").innerText = '✏️ Mode Ubah Data Catatan';
+            document.getElementById("formTitle").innerText = '✏️ Mode Ubah Catatan';
             document.getElementById("btnSubmitForm").innerText = 'Simpan Perubahan';
-            document.getElementById("btnCancelEdit").style.display = 'inline-block';
+            document.getElementById("btnCancelEdit").style.style.display = 'inline-block';
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
     }
@@ -633,7 +627,7 @@
     }
 
     function simulasikanHapusTunggal(id) {
-        if(confirm('Apakah Anda yakin ingin menghapus catatan ini?')) {
+        if(confirm('Hapus catatan ini?')) {
             notes = notes.filter(n => n.id !== id);
             localStorage.setItem('html_notes_db', JSON.stringify(notes));
             renderAllData();
@@ -641,23 +635,18 @@
     }
 
     function simulasikanHapusFolderMassal(folderName) {
-        if(confirm(`⚠️ PERINGATAN: Apakah Anda yakin ingin menghapus folder '${folderName}' beserta seluruh takes/isinya?`)) {
+        if(confirm(`Hapus folder '${folderName}' beserta seluruh takes/isinya?`)) {
             notes = notes.filter(n => n.folder !== folderName);
             localStorage.setItem('html_notes_db', JSON.stringify(notes));
             renderAllData();
         }
     }
 
-    function simulasikanLogout() {
-        if(confirm('Apakah Anda yakin ingin keluar?')) {
-            alert('Aplikasi keluar (Simulasi)');
-        }
-    }
-
+    function simulasikanLogout() { alert('Aplikasi keluar (Simulasi)'); }
     function toggleGroupSection(e, buttonElement) {
         const body = buttonElement.closest('.grup-wrapper').querySelector('.grup-body');
         body.classList.toggle('is-open');
-        buttonElement.innerText = body.classList.contains('is-open') ? "📁 Tutup Folder" : "📂 Buka Folder";
+        buttonElement.innerText = body.classList.contains('is-open') ? "📁 Tutup" : "📂 Buka";
     }
 
     function toggleNoteDetails(e, triggerElement) {
@@ -665,13 +654,7 @@
         const bodyContent = noteCard.querySelector('.note-body-content');
         const btn = noteCard.querySelector('.btn-toggle-note');
         bodyContent.classList.toggle('is-open');
-        if (btn) btn.innerText = bodyContent.classList.contains('is-open') ? "🔼 Tutup Catatan" : "🔽 Baca Selengkapnya";
-    }
-
-    function copyUrlToClipboard(element) {
-        navigator.clipboard.writeText(element.innerText).then(() => {
-            alert("📋 Link disalin ke clipboard!");
-        });
+        if (btn) btn.innerText = bodyContent.classList.contains('is-open') ? "🔼 Tutup" : "🔽 Baca";
     }
 
     function applyFiltersAndSorting() {
@@ -695,12 +678,8 @@
                 const matchesDate = (selectedDate === "" || cardDate === selectedDate);
                 const matchesSearch = (searchText === "" || cardTitle.includes(searchText) || folderName.toLowerCase().includes(searchText));
                 
-                if (matchesDate && matchesSearch) {
-                    card.style.display = "";
-                    visibleCardsCount++;
-                } else {
-                    card.style.display = "none";
-                }
+                card.style.display = (matchesDate && matchesSearch) ? "" : "none";
+                if (matchesDate && matchesSearch) visibleCardsCount++;
             });
             
             wrapper.style.display = (visibleCardsCount > 0) ? "" : "none";
