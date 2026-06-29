@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Notepad Premium - Persistent Stay Edit</title>
+    <title>Smart Notepad Premium - Full Inline Edit</title>
     <style>
         :root {
             --bg-body: #f4f6f9;
@@ -209,9 +209,10 @@
         .btn-download-photo { display: block; width: 100%; box-sizing: border-box; text-align: center; background: #3182ce; color: #fff; text-decoration: none; font-size: 10px; padding: 4px; margin-top: 4px; border-radius: 4px; font-weight: bold; }
         
         /* Inline Edit Box style */
-        .note-body-text { padding: 5px; border-radius: 4px; display: block; width: 100%; box-sizing: border-box; transition: background 0.2s; }
-        .note-body-text:hover { background: rgba(49, 130, 206, 0.15); cursor: pointer; }
+        .editable-folder-title, .editable-note-title, .note-body-text { padding: 4px; border-radius: 4px; display: inline-block; transition: background 0.2s; }
+        .editable-folder-title:hover, .editable-note-title:hover, .note-body-text:hover { background: rgba(49, 130, 206, 0.15); cursor: pointer; }
         .inline-edit-textarea { width: 100%; height: 90px; padding: 8px; font-family: inherit; font-size: 14px; border: 2px solid #3182ce; border-radius: 6px; background: var(--bg-card); color: var(--text-main); box-sizing: border-box; margin: 5px 0; display: block; }
+        .inline-edit-input { padding: 4px 8px; border: 2px solid #3182ce; border-radius: 4px; background: var(--bg-card); color: var(--text-main); font-size: inherit; font-weight: inherit; font-family: inherit; }
     </style>
 </head>
 <body class="mode-auto">
@@ -477,7 +478,7 @@
                 document.getElementById('linkTableBody').innerHTML += `
                     <tr data-noteid="${note.id}" data-date="${note.created_at.substring(0,10)}" data-notetitle="${note.title}" data-foldername="${note.folder}">
                         <td>${note.folder}</td>
-                        <td><strong><span>${note.title}</span></strong></td>
+                        <td><strong><span class="editable-note-title" id="target-judul-link-${note.id}" ondblclick="eksekusiEditJudulSaja('${note.id}', 'tautan')">${note.title}</span></strong></td>
                         <td><code title="${note.link}">${note.link}</code></td>
                         <td><a href="${note.link}" target="_blank" style="background: #3182ce; color: #fff; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: bold;">🚀 Buka</a></td>
                     </tr>`;
@@ -496,7 +497,8 @@
             <div class="grup-wrapper" id="${folderId}" data-foldername="${folderName}" data-tabtype="${tabType}">
                 <div class="grup-header">
                     <div class="drag-folder-handle">
-                        <span>📁 Folder: <span>${folderName}</span> (${items.length})</span>
+                        <!-- FITUR BARU: Double Click untuk ganti Nama Folder Lokal langsung -->
+                        <span class="editable-folder-title" id="target-folder-${tabType}-${md5(folderName)}" ondblclick="eksekusiEditFolderMassal('${folderName}', '${tabType}')">📁 Folder: <span>${folderName}</span> (${items.length})</span>
                     </div>
                     <div class="grup-actions">
                         <button class="btn-delete-folder" onclick="simulasikanHapusFolderMassal('${folderName}')">🗑️ Hapus</button>
@@ -511,16 +513,15 @@
                 <div class="note-card" id="card-${tabType}-${note.id}" data-noteid="${note.id}" data-notetitle="${note.title}" data-date="${note.created_at.substring(0,10)}">
                     <div class="note-header-block">
                         <div class="drag-file-title-handle">
-                            <h3><span>${note.title}</span></h3>
+                            <!-- FITUR BARU: Double Click untuk ganti Judul Catatan Lokal langsung -->
+                            <h3 class="editable-note-title" id="target-judul-${tabType}-${note.id}" ondblclick="eksekusiEditJudulSaja('${note.id}', '${tabType}')"><span>${note.title}</span></h3>
                             <div class="meta-info">📅 ${note.created_at}</div>
                         </div>
                         <button class="btn-toggle-note" onclick="toggleNoteDetails(event, this)" style="margin-top:5px;">🔽 Baca</button>
                     </div>
                     <div class="note-body-content">
-                        
-                        <!-- TARGET UTAMA TEXT CONTAINER -->
                         <div id="wrapper-isi-${tabType}-${note.id}">
-                            <p class="note-body-text" id="target-draf-isi-${tabType}-${note.id}" style="white-space: pre-line; line-height: 1.5; color: var(--text-main); font-size:14px;" ondblclick="eksekusiEditIsiSaja('${note.id}', '${tabType}')">${note.content}</p>
+                            <p class="note-body-text" id="target-draf-isi-${tabType}-${noteId}" style="white-space: pre-line; line-height: 1.5; color: var(--text-main); font-size:14px;" ondblclick="eksekusiEditIsiSaja('${note.id}', '${tabType}')">${note.content}</p>
                         </div>
                         
                         ${note.link ? `<a href="${note.link}" target="_blank" class="note-link">🔗 Kunjungi Website</a>` : ''}
@@ -559,13 +560,106 @@
         container.innerHTML += folderHTML;
     }
 
-    // --- PERBAIKAN TOTAL: PROSES SIMPAN TANPA RESET RENDER ULANG LAYAR ---
+    // --- FITUR BARU: INLINE EDIT JUDUL CATATAN (DOUBLE CLICK) ---
+    function eksekusiEditJudulSaja(noteId, tabType) {
+        let note = notes.find(n => n.id === noteId);
+        if(!note) return;
+
+        let titleElement = tabType === 'tautan' ? 
+            document.getElementById(`target-judul-link-${noteId}`) : 
+            document.getElementById(`target-judul-${tabType}-${noteId}`);
+
+        if (titleElement && titleElement.tagName !== 'INPUT') {
+            let currentTitle = note.title;
+            let input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'inline-edit-input';
+            input.value = currentTitle;
+
+            titleElement.replaceWith(input);
+            input.focus();
+
+            let saveTitle = function() {
+                let updatedTitle = input.value.trim() || 'Catatan Tanpa Judul';
+                note.title = updatedTitle;
+                localStorage.setItem('html_notes_db', JSON.stringify(notes));
+
+                // Ganti balik ke element h3/span bawaan secara lokal instan
+                if(tabType === 'tautan') {
+                    let strongSpan = document.createElement('span');
+                    strongSpan.className = 'editable-note-title';
+                    strongSpan.id = `target-judul-link-${noteId}`;
+                    strongSpan.innerText = updatedTitle;
+                    strongSpan.setAttribute('ondblclick', `eksekusiEditJudulSaja('${noteId}', 'tautan')`);
+                    input.replaceWith(strongSpan);
+                } else {
+                    let h3 = document.createElement('h3');
+                    h3.className = 'editable-note-title';
+                    h3.id = `target-judul-${tabType}-${noteId}`;
+                    h3.innerHTML = `<span>${updatedTitle}</span>`;
+                    h3.setAttribute('ondblclick', `eksekusiEditJudulSaja('${noteId}', '${tabType}')`);
+                    input.replaceWith(h3);
+                }
+
+                // Sinkronisasi teks judul ke tab lainnya di latar belakang
+                let semuaTab = ['semua', 'tulisan', 'galeri', 'vid', 'dokumen'];
+                semuaTab.forEach(t => {
+                    if(t !== tabType) {
+                        let tJudul = document.getElementById(`target-judul-${t}-${noteId}`);
+                        if(tJudul) tJudul.querySelector('span').innerText = updatedTitle;
+                    }
+                });
+                let tLink = document.getElementById(`target-judul-link-${noteId}`);
+                if(tLink && tabType !== 'tautan') tLink.innerText = updatedTitle;
+            };
+
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') saveTitle(); });
+            input.addEventListener('blur', saveTitle);
+        }
+    }
+
+    // --- FITUR BARU: INLINE EDIT NAMA FOLDER MASSAL (DOUBLE CLICK) ---
+    function eksekusiEditFolderMassal(oldFolderName, tabType) {
+        let folderElement = document.getElementById(`target-folder-${tabType}-${md5(oldFolderName)}`);
+        
+        if (folderElement && folderElement.tagName !== 'INPUT') {
+            let input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'inline-edit-input';
+            input.value = oldFolderName;
+
+            folderElement.replaceWith(input);
+            input.focus();
+
+            let saveFolderMassal = function() {
+                let newFolderName = input.value.trim() || 'Umum / Tanpa Grup';
+                
+                if (newFolderName !== oldFolderName) {
+                    // Update database lokal untuk semua note yang memiliki nama folder ini
+                    notes.forEach(note => {
+                        if (note.folder === oldFolderName) {
+                            note.folder = newFolderName;
+                        }
+                    });
+                    localStorage.setItem('html_notes_db', JSON.stringify(notes));
+                    
+                    // Supaya aman dan id folder teregenerasi dengan MD5 yang baru, render ulang datanya secara instan
+                    renderAllData();
+                } else {
+                    renderAllData();
+                }
+            };
+
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') saveFolderMassal(); });
+            input.addEventListener('blur', saveFolderMassal);
+        }
+    }
+
     function eksekusiEditIsiSaja(noteId, tabType) {
         let note = notes.find(n => n.id === noteId);
         if(!note) return;
 
         let contentElement = document.getElementById(`target-draf-isi-${tabType}-${noteId}`);
-        let wrapperElement = document.getElementById(`wrapper-isi-${tabType}-${noteId}`);
         
         if (contentElement && contentElement.tagName !== 'TEXTAREA') {
             let currentContentText = note.content;
@@ -576,15 +670,11 @@
             contentElement.replaceWith(textarea);
             textarea.focus();
 
-            // Fungsi penyimpanan lokal instan
             textarea.addEventListener('blur', function() {
                 let updatedValue = textarea.value.trim() || '(Tidak ada isi)';
-                
-                // 1. Perbarui database array utama
                 note.content = updatedValue;
                 localStorage.setItem('html_notes_db', JSON.stringify(notes));
 
-                // 2. Kembalikan element ke bentuk teks p biasa tanpa memanggil renderAllData()
                 let p = document.createElement('p');
                 p.className = 'note-body-text';
                 p.id = `target-draf-isi-${tabType}-${noteId}`;
@@ -594,7 +684,6 @@
                 
                 textarea.replaceWith(p);
 
-                // 3. Sinkronisasikan teks baru tersebut ke tab lain di belakang layar secara diam-diam
                 let semuaTab = ['semua', 'tulisan', 'galeri', 'vid', 'dokumen'];
                 semuaTab.forEach(tab => {
                     if(tab !== tabType) {
@@ -695,6 +784,12 @@
         document.getElementById('sortOrder').value = "default";
         renderAllData();
     }
+
+    document.addEventListener("click", function(e) {
+        if (!e.target.closest('#searchQuery') && !e.target.closest('#searchSuggestions')) {
+            document.getElementById('searchSuggestions').style.display = "none";
+        }
+    });
 
     function md5(string) { return btoa(encodeURIComponent(string)).substring(0, 10); }
 </script>
