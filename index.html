@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Notepad Premium - Clean Media Gallery</title>
+    <title>Smart Notepad Premium - Ultimate Media Support</title>
     <style>
         :root {
             --bg-body: #f4f6f9;
@@ -190,8 +190,8 @@
         .note-img { width: 100%; height: 90px; object-fit: cover; border-radius: 6px; }
         
         .video-item { background: var(--bg-body); padding: 6px; border-radius: 8px; border: 1px solid var(--border-color); width: 100%; box-sizing: border-box; }
-        @media (min-width: 480px) { .video-item { width: 200px; } }
-        .note-video { width: 100%; height: 120px; border-radius: 6px; background: #000; }
+        @media (min-width: 480px) { .video-item { width: 220px; } }
+        .note-video { width: 100%; height: 130px; border-radius: 6px; background: #000; display: block; }
         
         .doc-item { background: var(--bg-card); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); width: 100%; text-align: center; box-sizing: border-box; }
         @media (min-width: 480px) { .doc-item { width: 140px; } }
@@ -245,11 +245,12 @@
             <textarea id="noteContentInput" placeholder="Tulis draf teks atau catatanmu secara leluasa di sini..."></textarea>
             <input type="text" id="noteLinkInput" placeholder="Tautan Link Website (Contoh: https://google.com)">
             
+            <!-- UPDATE: Menghilangkan accept filter spesifik agar semua format extension bisa masuk -->
             <label style="font-weight: bold; font-size: 13px; display:block; margin-top:10px;">Tambah Foto Berjumlah Banyak:</label>
-            <input type="file" id="photoInput" accept="image/*" multiple style="margin: 5px 0; font-size: 12px;">
+            <input type="file" id="photoInput" multiple style="margin: 5px 0; font-size: 12px;">
             
-            <label style="font-weight: bold; font-size: 13px; display:block; margin-top:10px;">Tambah Video Berjumlah Banyak:</label>
-            <input type="file" id="videoInput" accept="video/*" multiple style="margin: 5px 0; font-size: 12px;">
+            <label style="font-weight: bold; font-size: 13px; display:block; margin-top:10px;">Tambah Video Berjumlah Banyak (Mendukung .mp4, .mov, record, dll):</label>
+            <input type="file" id="videoInput" multiple style="margin: 5px 0; font-size: 12px;">
 
             <label style="font-weight: bold; font-size: 13px; display:block; margin-top:10px;">Tambah Dokumen Berjumlah Banyak:</label>
             <input type="file" id="docInput" multiple style="margin: 5px 0; font-size: 12px;">
@@ -304,7 +305,6 @@
         <div class="folder-list-container" id="container-tulisan"></div>
     </div>
 
-    <!-- TAB MEDIA: Dibuat bersih tanpa teks detail draf -->
     <div id="galeri" class="tab-content">
         <h2>🖼️ Pusat Gambar Terstruktur Clean View</h2>
         <div class="folder-list-container" id="container-galeri"></div>
@@ -333,13 +333,19 @@
 
 <!-- JAVASCRIPT SYSTEM APPS -->
 <script>
+    // Membaca database catatan utama teks dari LocalStorage
     let notes = JSON.parse(localStorage.getItem('html_notes_db')) || [];
+    
+    // Penyimpanan blob memori lokal untuk menampung data file video/foto yang di-upload agar awet selama tab aktif
+    let mediaBlobsStore = {};
+
     let viewModes = ['auto', 'phone', 'laptop'];
     let currentViewIndex = 0;
 
-    let tempPhotos = [];
-    let tempVideos = [];
-    let tempDocs = [];
+    // Tracker file input
+    let currentUploadedPhotos = [];
+    let currentUploadedVideos = [];
+    let currentUploadedDocs = [];
 
     document.addEventListener("DOMContentLoaded", function() {
         const activeTab = sessionStorage.getItem("active_tab") || "semua";
@@ -401,31 +407,38 @@
         applyFiltersAndSorting();
     }
 
-    function fileToBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve({ name: file.name, data: reader.result });
-            reader.onerror = error => reject(error);
-        });
-    }
-
+    // --- PERBAIKAN BESAR UTAMA: MENGGUNAKAN OBJECT URL BLOB AGAR INSTAN DAN COCOK UNTUK SEMUA FORMAT VIDEO ---
     function setupFileInputListeners() {
-        document.getElementById('photoInput').addEventListener('change', async function(e) {
-            tempPhotos = [];
-            for (let file of e.target.files) { let res = await fileToBase64(file); tempPhotos.push(res); }
+        document.getElementById('photoInput').addEventListener('change', function(e) {
+            currentUploadedPhotos = [];
+            Array.from(e.target.files).forEach(file => {
+                let blobUrl = URL.createObjectURL(file);
+                let fileId = "media_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+                mediaBlobsStore[fileId] = blobUrl; // Simpan ke storage runtime
+                currentUploadedPhotos.push({ id: fileId, name: file.name, type: file.type });
+            });
             renderPreviews();
         });
 
-        document.getElementById('videoInput').addEventListener('change', async function(e) {
-            tempVideos = [];
-            for (let file of e.target.files) { let res = await fileToBase64(file); tempVideos.push(res); }
+        document.getElementById('videoInput').addEventListener('change', function(e) {
+            currentUploadedVideos = [];
+            Array.from(e.target.files).forEach(file => {
+                let blobUrl = URL.createObjectURL(file);
+                let fileId = "media_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+                mediaBlobsStore[fileId] = blobUrl;
+                currentUploadedVideos.push({ id: fileId, name: file.name, type: file.type });
+            });
             renderPreviews();
         });
 
-        document.getElementById('docInput').addEventListener('change', async function(e) {
-            tempDocs = [];
-            for (let file of e.target.files) { let res = await fileToBase64(file); tempDocs.push(res); }
+        document.getElementById('docInput').addEventListener('change', function(e) {
+            currentUploadedDocs = [];
+            Array.from(e.target.files).forEach(file => {
+                let blobUrl = URL.createObjectURL(file);
+                let fileId = "media_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+                mediaBlobsStore[fileId] = blobUrl;
+                currentUploadedDocs.push({ id: fileId, name: file.name, type: file.type });
+            });
             renderPreviews();
         });
     }
@@ -433,9 +446,9 @@
     function renderPreviews() {
         const previewContainer = document.getElementById('previewContainer');
         previewContainer.innerHTML = ""; 
-        tempPhotos.forEach(p => { previewContainer.innerHTML += `<img src="${p.data}">`; });
-        tempVideos.forEach(v => { previewContainer.innerHTML += `<video src="${v.data}"></video>`; });
-        tempDocs.forEach(d => { previewContainer.innerHTML += `<div class="preview-box">📄<br>${d.name}</div>`; });
+        currentUploadedPhotos.forEach(p => { previewContainer.innerHTML += `<img src="${mediaBlobsStore[p.id]}">`; });
+        currentUploadedVideos.forEach(v => { previewContainer.innerHTML += `<video src="${mediaBlobsStore[v.id]}" muted></video>`; });
+        currentUploadedDocs.forEach(d => { previewContainer.innerHTML += `<div class="preview-box">📄<br>${d.name}</div>`; });
     }
 
     function renderAllData() {
@@ -458,13 +471,11 @@
         for (let folderName in groups) {
             let items = groups[folderName];
             
-            // Render Tab Reguler teks bawaan
             buildFolderHTML('semua', folderName, items);
             
             let textOnly = items.filter(n => !n.photos.length && !n.videos.length && !n.docs.length && !n.link);
             if(textOnly.length) buildFolderHTML('tulisan', folderName, textOnly);
 
-            // REVISI: Render Tab Khusus Media menggunakan fungsi "buildCleanMediaFolderHTML" agar bersih tanpa draf
             let hasPhotos = items.filter(n => n.photos.length);
             if(hasPhotos.length) buildCleanMediaFolderHTML('galeri', folderName, hasPhotos, 'photos');
 
@@ -531,21 +542,21 @@
                         <div class="note-gallery">
                             ${note.photos.map(p => `
                                 <div class="gallery-item">
-                                    <img src="${p.data}" class="note-img" onclick="window.open(this.src, '_blank')">
-                                    <a href="${p.data}" download="${p.name}" class="btn-download-photo">📥 Simpan</a>
+                                    <img src="${mediaBlobsStore[p.id] || ''}" class="note-img" onclick="window.open(this.src, '_blank')">
+                                    <a href="${mediaBlobsStore[p.id] || ''}" download="${p.name}" class="btn-download-photo">📥 Simpan</a>
                                 </div>
                             `).join('')}
                             ${note.videos.map(v => `
                                 <div class="video-item">
-                                    <video class="note-video" controls><source src="${v.data}"></video>
-                                    <a href="${v.data}" download="${v.name}" class="btn-download-photo" style="background:#3182ce;">📥 Simpan Vid</a>
+                                    <video class="note-video" controls><source src="${mediaBlobsStore[v.id] || ''}"></video>
+                                    <a href="${mediaBlobsStore[v.id] || ''}" download="${v.name}" class="btn-download-photo" style="background:#3182ce;">📥 Simpan Vid</a>
                                 </div>
                             `).join('')}
                             ${note.docs.map(d => `
                                 <div class="doc-item">
                                     <div class="doc-icon">📄</div>
                                     <div class="doc-name-text" title="${d.name}">${d.name}</div>
-                                    <a href="${d.data}" download="${d.name}" class="btn-download-photo" style="background:#4a5568;">📥 Unduh</a>
+                                    <a href="${mediaBlobsStore[d.id] || ''}" download="${d.name}" class="btn-download-photo" style="background:#4a5568;">📥 Unduh</a>
                                 </div>
                             `).join('')}
                         </div>
@@ -562,7 +573,6 @@
         container.innerHTML += folderHTML;
     }
 
-    // --- FITUR BARU FIX MUTLAK: MEMBUAT GRID MEDIA BERSIH TANPA DETAIL DRAF CATATAN ---
     function buildCleanMediaFolderHTML(tabType, folderName, items, mediaType) {
         let container = document.getElementById('container-' + tabType);
         let folderId = `folder-${tabType}-${md5(folderName)}`;
@@ -571,7 +581,7 @@
             <div class="grup-wrapper" id="${folderId}" data-foldername="${folderName}" data-tabtype="${tabType}">
                 <div class="grup-header">
                     <div class="drag-folder-handle">
-                        <span class="editable-folder-title" id="target-folder-${tabType}-${md5(folderName)}" ondblclick="eksekusiEditFolderMassal('${folderName}', '${tabType}')">📁 Folder Gambar: <span>${folderName}</span></span>
+                        <span class="editable-folder-title" id="target-folder-${tabType}-${md5(folderName)}" ondblclick="eksekusiEditFolderMassal('${folderName}', '${tabType}')">📁 Folder: <span>${folderName}</span></span>
                     </div>
                     <div class="grup-actions">
                         <button class="btn-delete-folder" onclick="simulasikanHapusFolderMassal('${folderName}')">🗑️ Hapus Folder</button>
@@ -582,34 +592,31 @@
                     <div class="note-gallery" style="justify-content: flex-start;">`;
 
         items.forEach(note => {
-            // Render Foto Saja
             if (mediaType === 'photos') {
                 note.photos.forEach(p => {
                     folderHTML += `
                         <div class="gallery-item" data-date="${note.created_at.substring(0,10)}" data-notetitle="${note.title}">
-                            <img src="${p.data}" class="note-img" onclick="window.open(this.src, '_blank')">
-                            <a href="${p.data}" download="${p.name}" class="btn-download-photo">📥 Download</a>
+                            <img src="${mediaBlobsStore[p.id] || ''}" class="note-img" onclick="window.open(this.src, '_blank')">
+                            <a href="${mediaBlobsStore[p.id] || ''}" download="${p.name}" class="btn-download-photo">📥 Download</a>
                         </div>`;
                 });
             }
-            // Render Video Saja
             if (mediaType === 'videos') {
                 note.videos.forEach(v => {
                     folderHTML += `
                         <div class="video-item" data-date="${note.created_at.substring(0,10)}" data-notetitle="${note.title}">
-                            <video class="note-video" controls><source src="${v.data}"></video>
-                            <a href="${v.data}" download="${v.name}" class="btn-download-photo" style="background:#3182ce;">📥 Download Video</a>
+                            <video class="note-video" controls><source src="${mediaBlobsStore[v.id] || ''}"></video>
+                            <a href="${mediaBlobsStore[v.id] || ''}" download="${v.name}" class="btn-download-photo" style="background:#3182ce;">📥 Download Video</a>
                         </div>`;
                 });
             }
-            // Render Dokumen Saja
             if (mediaType === 'docs') {
                 note.docs.forEach(d => {
                     folderHTML += `
                         <div class="doc-item" data-date="${note.created_at.substring(0,10)}" data-notetitle="${note.title}">
                             <div class="doc-icon">📄</div>
                             <div class="doc-name-text" title="${d.name}">${d.name}</div>
-                            <a href="${d.data}" download="${d.name}" class="btn-download-photo" style="background:#4a5568;">📥 Download</a>
+                            <a href="${mediaBlobsStore[d.id] || ''}" download="${d.name}" class="btn-download-photo" style="background:#4a5568;">📥 Download</a>
                         </div>`;
                 });
             }
@@ -740,6 +747,7 @@
         }
     }
 
+    // --- INSTAN SUBMIT FORM: Form berjalan mulus dan instan tanpa bottleneck memori Base64 ---
     function simulasikanSimpanCatatan(e) {
         e.preventDefault();
         let title = document.getElementById("noteTitleInput").value || 'Catatan Tanpa Judul';
@@ -751,13 +759,18 @@
 
         let newNote = {
             id: Date.now().toString(), title: title, content: content, link: link, folder: folder,
-            photos: tempPhotos, videos: tempVideos, docs: tempDocs,
+            photos: currentUploadedPhotos, 
+            videos: currentUploadedVideos, 
+            docs: currentUploadedDocs,
             created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
         };
         notes.unshift(newNote);
         
         localStorage.setItem('html_notes_db', JSON.stringify(notes));
-        tempPhotos = []; tempVideos = []; tempDocs = [];
+        
+        // Reset file queue draf tracker
+        currentUploadedPhotos = []; currentUploadedVideos = []; currentUploadedDocs = [];
+        
         document.getElementById("noteForm").reset();
         document.getElementById("previewContainer").innerHTML = "";
         renderAllData();
@@ -803,7 +816,6 @@
 
         if (!activeTabContent) return;
 
-        // Modifikasi filter agar menargetkan note-card & item galeri media secara fleksibel
         const folderWrappers = activeTabContent.querySelectorAll('.grup-wrapper');
         folderWrappers.forEach(wrapper => {
             const folderName = wrapper.getAttribute('data-foldername');
@@ -830,12 +842,6 @@
         document.getElementById('sortOrder').value = "default";
         renderAllData();
     }
-
-    document.addEventListener("click", function(e) {
-        if (!e.target.closest('#searchQuery') && !e.target.closest('#searchSuggestions')) {
-            document.getElementById('searchSuggestions').style.display = "none";
-        }
-    });
 
     function md5(string) { return btoa(encodeURIComponent(string)).substring(0, 10); }
 </script>
