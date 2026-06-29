@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Notepad Premium - True Local Content Edit</title>
+    <title>Smart Notepad Premium - Persistent Stay Edit</title>
     <style>
         :root {
             --bg-body: #f4f6f9;
@@ -518,8 +518,10 @@
                     </div>
                     <div class="note-body-content">
                         
-                        <!-- PENGUNCIAN ELEMENT TARGET (LINGKARAN MERAH SCREENSHOT): Target ID dibuat statis murni mengikat pada ID Catatan -->
-                        <p class="note-body-text" id="target-draf-isi-${note.id}" style="white-space: pre-line; line-height: 1.5; color: var(--text-main); font-size:14px;" ondblclick="eksekusiEditIsiSaja('${note.id}')">${note.content}</p>
+                        <!-- TARGET UTAMA TEXT CONTAINER -->
+                        <div id="wrapper-isi-${tabType}-${note.id}">
+                            <p class="note-body-text" id="target-draf-isi-${tabType}-${note.id}" style="white-space: pre-line; line-height: 1.5; color: var(--text-main); font-size:14px;" ondblclick="eksekusiEditIsiSaja('${note.id}', '${tabType}')">${note.content}</p>
+                        </div>
                         
                         ${note.link ? `<a href="${note.link}" target="_blank" class="note-link">🔗 Kunjungi Website</a>` : ''}
 
@@ -546,8 +548,7 @@
                         </div>
 
                         <div class="action-bar">
-                            <!-- KLIK TOMBOL EDIT: Memaksa fokus perubahan HANYA pada draf isi di atasnya -->
-                            <button onclick="eksekusiEditIsiSaja('${note.id}')" class="btn-edit">✏️ Edit</button>
+                            <button onclick="eksekusiEditIsiSaja('${note.id}', '${tabType}')" class="btn-edit">✏️ Edit</button>
                             <button onclick="simulasikanHapusTunggal('${note.id}')" class="btn-delete">🗑️ Hapus</button>
                         </div>
                     </div>
@@ -558,13 +559,13 @@
         container.innerHTML += folderHTML;
     }
 
-    // --- FITUR FIX MUTLAK 100%: HANYA MENGUBAH ISI DRAF SAJA DI KARTU LOKAL ---
-    function eksekusiEditIsiSaja(noteId) {
+    // --- PERBAIKAN TOTAL: PROSES SIMPAN TANPA RESET RENDER ULANG LAYAR ---
+    function eksekusiEditIsiSaja(noteId, tabType) {
         let note = notes.find(n => n.id === noteId);
         if(!note) return;
 
-        // Cari elemen draf isi secara mutlak berdasarkan ID unik catatan, bukan ID tab
-        let contentElement = document.getElementById(`target-draf-isi-${noteId}`);
+        let contentElement = document.getElementById(`target-draf-isi-${tabType}-${noteId}`);
+        let wrapperElement = document.getElementById(`wrapper-isi-${tabType}-${noteId}`);
         
         if (contentElement && contentElement.tagName !== 'TEXTAREA') {
             let currentContentText = note.content;
@@ -572,15 +573,35 @@
             textarea.className = 'inline-edit-textarea';
             textarea.value = currentContentText;
 
-            // Menggantikan tulisan lama draf isi (Lingkaran merah) menjadi textarea pengeditan
             contentElement.replaceWith(textarea);
             textarea.focus();
 
-            // Fungsi simpan otomatis saat kursor keluar dari box tulisan draf isi
+            // Fungsi penyimpanan lokal instan
             textarea.addEventListener('blur', function() {
-                note.content = textarea.value.trim() || '(Tidak ada isi)';
+                let updatedValue = textarea.value.trim() || '(Tidak ada isi)';
+                
+                // 1. Perbarui database array utama
+                note.content = updatedValue;
                 localStorage.setItem('html_notes_db', JSON.stringify(notes));
-                renderAllData(); // Segarkan tampilan di tempat tanpa merubah judul
+
+                // 2. Kembalikan element ke bentuk teks p biasa tanpa memanggil renderAllData()
+                let p = document.createElement('p');
+                p.className = 'note-body-text';
+                p.id = `target-draf-isi-${tabType}-${noteId}`;
+                p.style.cssText = "white-space: pre-line; line-height: 1.5; color: var(--text-main); font-size:14px;";
+                p.innerText = updatedValue;
+                p.setAttribute('ondblclick', `eksekusiEditIsiSaja('${noteId}', '${tabType}')`);
+                
+                textarea.replaceWith(p);
+
+                // 3. Sinkronisasikan teks baru tersebut ke tab lain di belakang layar secara diam-diam
+                let semuaTab = ['semua', 'tulisan', 'galeri', 'vid', 'dokumen'];
+                semuaTab.forEach(tab => {
+                    if(tab !== tabType) {
+                        let targetLain = document.getElementById(`target-draf-isi-${tab}-${noteId}`);
+                        if(targetLain) targetLain.innerText = updatedValue;
+                    }
+                });
             });
         }
     }
